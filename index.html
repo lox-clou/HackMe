@@ -5,155 +5,104 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CTF-15 // HackMe</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #111111;
-            --bg-tertiary: #1a1a1a;
-            --text-primary: #00ff41;
-            --text-secondary: #00cc33;
-            --text-dim: #006619;
-            --accent: #00ff41;
-            --error: #ff3333;
-            --warning: #ffaa00;
-            --border: #222222;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Courier New', Courier, monospace;
-            background: var(--bg-primary);
-            color: var(--text-primary);
+            background: #0a0a0a;
+            color: #00ff41;
             min-height: 100vh;
             line-height: 1.6;
         }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
         header {
-            border-bottom: 2px solid var(--text-dim);
+            border-bottom: 2px solid #006619;
             padding-bottom: 20px;
             margin-bottom: 40px;
         }
-
         h1 {
             font-size: 2.5em;
-            color: var(--accent);
+            color: #00ff41;
             text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
             margin-bottom: 10px;
         }
-
-        .subtitle {
-            color: var(--text-dim);
-            font-size: 0.9em;
-        }
-
+        .subtitle { color: #006619; font-size: 0.9em; }
         .progress-container {
             margin: 30px 0;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
+            background: #111;
+            border: 1px solid #222;
             border-radius: 4px;
             overflow: hidden;
         }
-
         .progress-bar {
             height: 30px;
-            background: linear-gradient(90deg, var(--text-dim), var(--accent));
+            background: linear-gradient(90deg, #006619, #00ff41);
             width: 0%;
             transition: width 0.5s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--bg-primary);
+            color: #0a0a0a;
             font-weight: bold;
         }
-
         .stats {
             display: flex;
             justify-content: space-between;
             margin-top: 10px;
-            color: var(--text-secondary);
+            color: #00cc33;
             font-size: 0.9em;
         }
-
         .stage-container {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
+            background: #111;
+            border: 1px solid #222;
             border-radius: 8px;
             padding: 40px;
             min-height: 500px;
-            position: relative;
         }
-
         .stage-header {
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid #222;
             padding-bottom: 20px;
             margin-bottom: 30px;
         }
-
         .stage-number {
-            color: var(--text-dim);
+            color: #006619;
             font-size: 0.85em;
             text-transform: uppercase;
             letter-spacing: 2px;
         }
-
         .stage-title {
             font-size: 2em;
-            color: var(--accent);
+            color: #00ff41;
             margin: 10px 0;
         }
-
-        .difficulty {
-            color: var(--warning);
-            font-size: 0.9em;
-        }
-
+        .difficulty { color: #ffaa00; font-size: 0.9em; }
         .task-description {
-            background: var(--bg-tertiary);
-            border-left: 4px solid var(--accent);
+            background: #1a1a1a;
+            border-left: 4px solid #00ff41;
             padding: 20px;
             margin: 20px 0;
             border-radius: 0 4px 4px 0;
         }
-
-        .task-content {
-            margin: 30px 0;
-        }
-
-        input[type="text"],
-        input[type="password"] {
+        .task-content { margin: 30px 0; }
+        input[type="text"], input[type="password"] {
             width: 100%;
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
+            background: #0a0a0a;
+            border: 1px solid #222;
+            color: #00ff41;
             padding: 15px;
             font-family: inherit;
             font-size: 1em;
             margin: 10px 0;
             border-radius: 4px;
-            transition: all 0.3s;
         }
-
-        input[type="text"]:focus,
-        input[type="password"]:focus {
+        input:focus {
             outline: none;
-            border-color: var(--accent);
+            border-color: #00ff41;
             box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
         }
-
         button {
-            background: var(--bg-tertiary);
-            border: 1px solid var(--accent);
-            color: var(--accent);
+            background: #1a1a1a;
+            border: 1px solid #00ff41;
+            color: #00ff41;
             padding: 12px 30px;
             font-family: inherit;
             font-size: 1em;
@@ -161,202 +110,115 @@
             margin: 5px 10px 5px 0;
             border-radius: 4px;
             transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
-
         button:hover {
-            background: var(--accent);
-            color: var(--bg-primary);
+            background: #00ff41;
+            color: #0a0a0a;
             box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
-            transform: translateY(-2px);
         }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
         .feedback {
             margin-top: 20px;
             padding: 15px;
             border-radius: 4px;
             display: none;
-            animation: fadeIn 0.3s;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
         .feedback.success {
             display: block;
             background: rgba(0, 255, 65, 0.1);
-            border: 1px solid var(--accent);
-            color: var(--accent);
+            border: 1px solid #00ff41;
+            color: #00ff41;
         }
-
         .feedback.error {
             display: block;
             background: rgba(255, 51, 51, 0.1);
-            border: 1px solid var(--error);
-            color: var(--error);
+            border: 1px solid #ff3333;
+            color: #ff3333;
         }
-
         .hint {
             margin-top: 20px;
             padding: 15px;
             background: rgba(255, 170, 0, 0.05);
-            border-left: 4px solid var(--warning);
-            border-radius: 0 4px 4px 0;
+            border-left: 4px solid #ffaa00;
             display: none;
-            color: var(--warning);
+            color: #ffaa00;
         }
-
-        .hint.show {
-            display: block;
-        }
-
+        .hint.show { display: block; }
         .navigation {
             display: flex;
             justify-content: space-between;
             margin-top: 40px;
             padding-top: 20px;
-            border-top: 1px solid var(--border);
+            border-top: 1px solid #222;
         }
-
-        .hidden {
-            display: none;
-        }
-
         .terminal {
             background: #000;
-            border: 1px solid var(--border);
+            border: 1px solid #222;
             padding: 20px;
             border-radius: 4px;
-            font-family: 'Courier New', monospace;
             margin: 20px 0;
         }
-
-        .terminal-line {
-            margin: 5px 0;
-        }
-
-        .terminal-prompt {
-            color: var(--accent);
-        }
-
         .file-tree {
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
+            background: #0a0a0a;
+            border: 1px solid #222;
             padding: 20px;
             border-radius: 4px;
             line-height: 2;
         }
-
-        .file-tree .folder {
-            color: var(--accent);
-            font-weight: bold;
-        }
-
+        .file-tree .folder { color: #00ff41; font-weight: bold; }
         .file-tree .file {
-            color: var(--text-secondary);
+            color: #00cc33;
             cursor: pointer;
             padding-left: 20px;
             display: block;
         }
-
-        .file-tree .file:hover {
-            color: var(--accent);
-            text-decoration: underline;
-        }
-
+        .file-tree .file:hover { color: #00ff41; text-decoration: underline; }
         .cipher-text {
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
+            background: #0a0a0a;
+            border: 1px solid #222;
             padding: 15px;
             border-radius: 4px;
             font-family: monospace;
             word-break: break-all;
             margin: 15px 0;
-            color: var(--warning);
+            color: #ffaa00;
         }
-
-        .locked-screen {
-            text-align: center;
-            padding: 100px 20px;
-        }
-
-        .locked-icon {
-            font-size: 5em;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
-        .completion-screen {
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        .completion-icon {
-            font-size: 6em;
-            margin-bottom: 30px;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
         .fake-form {
             max-width: 400px;
             margin: 30px auto;
             padding: 30px;
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
+            background: #0a0a0a;
+            border: 1px solid #222;
             border-radius: 4px;
         }
-
         .fake-form label {
             display: block;
             margin: 15px 0 5px;
-            color: var(--text-dim);
+            color: #006619;
             font-size: 0.85em;
         }
-
-        .glitch {
-            position: relative;
-            animation: glitch 3s infinite;
+        .completion-screen {
+            text-align: center;
+            padding: 60px 20px;
         }
-
-        @keyframes glitch {
-            0%, 90%, 100% { transform: translate(0); }
-            92% { transform: translate(-2px, 2px); }
-            94% { transform: translate(2px, -2px); }
-            96% { transform: translate(-2px, 0); }
-            98% { transform: translate(2px, 0); }
+        .completion-icon {
+            font-size: 6em;
+            margin-bottom: 30px;
         }
-
-        @media (max-width: 768px) {
-            .stage-container {
-                padding: 20px;
-            }
-            h1 {
-                font-size: 1.8em;
-            }
-            .stage-title {
-                font-size: 1.5em;
-            }
+        footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #222;
+            color: #006619;
+            text-align: center;
+            font-size: 0.8em;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1 class="glitch">&gt; CTF-15_</h1>
+            <h1>&gt; CTF-15_</h1>
             <div class="subtitle">// 15 уровней. последовательное прохождение.</div>
         </header>
 
@@ -370,37 +232,191 @@
 
         <div id="gameArea"></div>
 
-        <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--text-dim); text-align: center; font-size: 0.8em;">
+        <footer>
             CTF-15 // Образовательная платформа // Все уязвимости симулированы
         </footer>
     </div>
 
     <script>
-        // Игровые данные
-        const gameState = {
-            currentStage: parseInt(localStorage.getItem('ctf_stage')) || 1,
-            completed: JSON.parse(localStorage.getItem('ctf_completed')) || [],
-            flags: {
-                1: 's0urc3_c0d3',
-                2: 'h1dd3n_f13ld',
-                3: 'c00k13_m0nst3r',
-                4: 'b4s3_64_d3c0d3d',
-                5: 'r0t_13_s1mpl3',
-                6: 'c43s4r_c1ph3r',
-                7: '1nv1s1bl3_t3xt',
-                8: 'h34d3r_h4ck',
-                9: 'd30bfusc4t3d',
-                10: 'sql_1nj3ct10n',
-                11: 'xss_4tt4ck',
-                12: 'p4th_tr4v3rs4l',
-                13: 'c0mm4nd_1nj',
-                14: 'x0r_c1ph3r',
-                15: 'f1n4l_b0ss'
-            }
+        const flags = {
+            1: 's0urc3_c0d3',
+            2: 'h1dd3n_f13ld',
+            3: 'c00k13_m0nst3r',
+            4: 'b4s3_64_d3c0d3d',
+            5: 'r0t_13_s1mpl3',
+            6: 'c43s4r_c1ph3r',
+            7: '1nv1s1bl3_t3xt',
+            8: 'h34d3r_h4ck',
+            9: 'd30bfusc4t3d',
+            10: 'sql_1nj3ct10n',
+            11: 'xss_4tt4ck',
+            12: 'PT_TRAVERSAL_FLAG',
+            13: 'CMD_INJECTION_SUCCESS',
+            14: 'x0r_c1ph3r',
+            15: 'f1n4l_b0ss'
         };
 
-        // Этапы
-        const stages = [
+        let currentStage = parseInt(localStorage.getItem('ctf_stage')) || 1;
+        let completed = JSON.parse(localStorage.getItem('ctf_completed')) || [];
+
+        function updateProgress() {
+            const pct = ((currentStage - 1) / 15) * 100;
+            document.getElementById('progressBar').style.width = pct + '%';
+            document.getElementById('progressBar').textContent = Math.round(pct) + '%';
+            document.getElementById('stageInfo').textContent = 'Уровень ' + currentStage + ' из 15';
+            document.getElementById('completedInfo').textContent = 'Пройдено: ' + completed.length + '/15';
+        }
+
+        function showHint() {
+            var hint = document.getElementById('hint');
+            if (hint) hint.classList.toggle('show');
+        }
+
+        function checkAnswer() {
+            var input = document.getElementById('answer');
+            var feedback = document.getElementById('feedback');
+            var stage = stages[currentStage - 1];
+            
+            if (!input || !feedback || !stage) return;
+            
+            var answer = input.value.trim();
+            
+            if (stage.check(answer)) {
+                feedback.className = 'feedback success';
+                feedback.innerHTML = '✓ Правильно! Переход на следующий уровень...';
+                input.disabled = true;
+                
+                if (completed.indexOf(stage.id) === -1) {
+                    completed.push(stage.id);
+                    localStorage.setItem('ctf_completed', JSON.stringify(completed));
+                }
+                
+                setTimeout(function() {
+                    currentStage++;
+                    localStorage.setItem('ctf_stage', currentStage);
+                    renderStage();
+                }, 1500);
+            } else {
+                feedback.className = 'feedback error';
+                feedback.textContent = '✗ Неправильно. Попробуй ещё раз.';
+            }
+        }
+
+        function nextStage() {
+            if (currentStage < 15) {
+                currentStage++;
+                localStorage.setItem('ctf_stage', currentStage);
+                renderStage();
+            }
+        }
+
+        function prevStage() {
+            if (currentStage > 1) {
+                currentStage--;
+                localStorage.setItem('ctf_stage', currentStage);
+                renderStage();
+            }
+        }
+
+        function trySQL() {
+            var pass = document.getElementById('sqlPass').value;
+            var result = document.getElementById('sqlResult');
+            
+            if (pass.toLowerCase().indexOf('or') !== -1 || pass.indexOf('--') !== -1) {
+                result.innerHTML = '<span style="color:#00ff41;">✓ Доступ разрешён!</span>';
+                document.getElementById('answer').value = pass;
+            } else {
+                result.innerHTML = '<span style="color:#ff3333;">✗ Доступ запрещён</span>';
+            }
+        }
+
+        function tryXSS() {
+            var input = document.getElementById('xssInput').value;
+            var output = document.getElementById('xssOutput');
+            var secret = document.getElementById('secret-flag').innerText;
+            
+            if (input.toLowerCase().indexOf('<script>') !== -1) {
+                output.innerHTML = '<span style="color:#00ff41;">XSS выполнен! Флаг: ' + secret + '</span>';
+                document.getElementById('answer').value = secret;
+            } else {
+                output.innerHTML = '<span style="color:#006619;">Ввод: ' + input + '</span>';
+            }
+        }
+
+        function readFile(file) {
+            var vfs = {
+                'index.html': '<html>...</html>',
+                'style.css': 'body { color: green; }',
+                'passwd': 'root:x:0:0:root:/root:/bin/bash',
+                'flag.txt': 'PT_TRAVERSAL_FLAG'
+            };
+            var content = vfs[file] || 'File not found';
+            document.getElementById('pathOutput').textContent = '=== ' + file + ' ===\n' + content;
+            if (file === 'flag.txt') {
+                document.getElementById('answer').value = content;
+            }
+        }
+
+        function readPath() {
+            var input = document.getElementById('pathInput').value;
+            var output = document.getElementById('pathOutput');
+            
+            if (input.indexOf('flag') !== -1 || input.indexOf('../') !== -1) {
+                output.textContent = '=== /etc/flag.txt ===\nPT_TRAVERSAL_FLAG';
+                document.getElementById('answer').value = 'PT_TRAVERSAL_FLAG';
+            } else {
+                output.textContent = 'Permission denied';
+            }
+        }
+
+        function runCommand() {
+            var input = document.getElementById('cmdInput').value;
+            var output = document.getElementById('cmdOutput');
+            
+            if (input.indexOf(';') !== -1 || input.indexOf('&&') !== -1) {
+                output.innerHTML = '<span style="color:#00ff41;">CMD_INJECTION_SUCCESS</span>';
+                document.getElementById('answer').value = input;
+            } else {
+                output.innerHTML = 'PING ' + input + ': 64 bytes, time=1ms';
+            }
+        }
+
+        function checkBoss() {
+            var pass = document.getElementById('bossPass').value.toLowerCase();
+            if (pass === 'rot13_master') {
+                document.getElementById('bossReveal').style.display = 'block';
+                document.getElementById('answer').value = flags[15];
+            } else {
+                alert('Неправильно');
+            }
+        }
+
+        function decodeBase64(str) {
+            return atob(str);
+        }
+
+        function rot13(str) {
+            return str.replace(/[a-z]/gi, function(c) {
+                return String.fromCharCode(c.charCodeAt(0) + (c.toLowerCase() < 'n' ? 13 : -13));
+            });
+        }
+
+        function caesar(str, shift) {
+            return str.replace(/[a-z]/gi, function(c) {
+                var base = c.charCodeAt(0) < 97 ? 65 : 97;
+                return String.fromCharCode((c.charCodeAt(0) - base - shift + 26) % 26 + base);
+            });
+        }
+
+        function xorDecode(arr, key) {
+            var result = '';
+            for (var i = 0; i < arr.length; i++) {
+                result += String.fromCharCode(arr[i] ^ key);
+            }
+            return result;
+        }
+
+        var stages = [
             {
                 id: 1,
                 title: 'Исходный код',
@@ -408,7 +424,7 @@
                 description: 'Флаг спрятан в исходном коде страницы. Открой инструменты разработчика (F12) и найди комментарий.',
                 hint: 'Нажми F12 → Elements → ищи HTML-комментарий <!-- flag: ... -->',
                 type: 'source',
-                check: (ans) => ans === gameState.flags[1]
+                check: function(ans) { return ans === flags[1]; }
             },
             {
                 id: 2,
@@ -417,7 +433,7 @@
                 description: 'На странице есть скрытое поле формы. Найди его значение через инспектор.',
                 hint: 'F12 → Elements → найди input type="hidden" → скопируй value',
                 type: 'hidden',
-                check: (ans) => ans === gameState.flags[2]
+                check: function(ans) { return ans === flags[2]; }
             },
             {
                 id: 3,
@@ -426,7 +442,7 @@
                 description: 'Сервер установил cookie с флагом. Найди его.',
                 hint: 'В консоли введи: document.cookie или посмотри Application → Cookies',
                 type: 'cookie',
-                check: (ans) => ans === gameState.flags[3]
+                check: function(ans) { return ans === flags[3]; }
             },
             {
                 id: 4,
@@ -436,7 +452,7 @@
                 hint: 'Используй atob() в консоли или онлайн декодер',
                 type: 'base64',
                 encoded: 'YjRzNV82NF9kM2MwZDNk',
-                check: (ans) => ans === gameState.flags[4]
+                check: function(ans) { return ans === flags[4]; }
             },
             {
                 id: 5,
@@ -446,18 +462,18 @@
                 hint: 'ROT13 заменяет каждую букву на букву через 13 позиций',
                 type: 'rot13',
                 encoded: 'ebg_13_fvzcyr',
-                check: (ans) => ans === gameState.flags[5]
+                check: function(ans) { return ans === flags[5]; }
             },
             {
                 id: 6,
                 title: 'Шифр Цезаря',
                 difficulty: '★★★☆☆',
-                description: 'Шифр Цезаря со сдвигом 3. Расшифруй: "fdhvdu_flskhu"',
+                description: 'Шифр Цезаря со сдвигом 3. Расшифруй: fdhvdu_flskhu',
                 hint: 'Каждая буква сдвинута на 3 позиции назад. f→c, d→a, h→e',
                 type: 'caesar',
                 encoded: 'fdhvdu_flskhu',
                 shift: 3,
-                check: (ans) => ans === gameState.flags[6]
+                check: function(ans) { return ans === flags[6]; }
             },
             {
                 id: 7,
@@ -466,7 +482,7 @@
                 description: 'На странице есть невидимый текст. Найди его.',
                 hint: 'Выдели весь текст Ctrl+A или посмотри цвет текста в CSS',
                 type: 'invisible',
-                check: (ans) => ans === gameState.flags[7]
+                check: function(ans) { return ans === flags[7]; }
             },
             {
                 id: 8,
@@ -475,7 +491,7 @@
                 description: 'Флаг в заголовках ответа сервера. Найди X-Flag.',
                 hint: 'Посмотри Network tab или объект window.serverHeaders',
                 type: 'headers',
-                check: (ans) => ans === gameState.flags[8]
+                check: function(ans) { return ans === flags[8]; }
             },
             {
                 id: 9,
@@ -484,7 +500,7 @@
                 description: 'Код обфусцирован. Найди флаг в зашифрованной строке.',
                 hint: 'Base64 строка в коде содержит флаг. Декодируй её.',
                 type: 'obfuscation',
-                check: (ans) => ans === gameState.flags[9]
+                check: function(ans) { return ans === flags[9]; }
             },
             {
                 id: 10,
@@ -493,7 +509,7 @@
                 description: 'Обойди авторизацию через SQL-инъекцию.',
                 hint: 'Введи в пароль: \' OR \'1\'=\'1',
                 type: 'sqli',
-                check: (ans) => ans.toLowerCase().includes('or') && ans.includes('\'')
+                check: function(ans) { return ans.toLowerCase().indexOf('or') !== -1 && ans.indexOf('\'') !== -1; }
             },
             {
                 id: 11,
@@ -502,7 +518,7 @@
                 description: 'Найди флаг через XSS. Он в элементе #secret-flag.',
                 hint: 'В консоли: document.getElementById(\'secret-flag\').innerText',
                 type: 'xss',
-                check: (ans) => ans === gameState.flags[11]
+                check: function(ans) { return ans === flags[11]; }
             },
             {
                 id: 12,
@@ -511,7 +527,7 @@
                 description: 'Прочитай /etc/flag.txt через path traversal.',
                 hint: 'Используй ../../ для навигации вверх по директориям',
                 type: 'traversal',
-                check: (ans) => ans === 'PT_TRAVERSAL_FLAG'
+                check: function(ans) { return ans === 'PT_TRAVERSAL_FLAG'; }
             },
             {
                 id: 13,
@@ -520,7 +536,7 @@
                 description: 'Выполни команду на сервере через инъекцию.',
                 hint: 'Разделитель команд: ; или &&. Попробуй: 127.0.0.1; cat /flag',
                 type: 'cmdi',
-                check: (ans) => ans.includes(';') || ans.includes('&&')
+                check: function(ans) { return ans.indexOf(';') !== -1 || ans.indexOf('&&') !== -1; }
             },
             {
                 id: 14,
@@ -529,7 +545,7 @@
                 description: 'Текст зашифрован XOR с ключом 0x42. Дешифруй.',
                 hint: 'Примени XOR с 0x42 к каждому байту',
                 type: 'xor',
-                check: (ans) => ans === gameState.flags[14]
+                check: function(ans) { return ans === flags[14]; }
             },
             {
                 id: 15,
@@ -538,507 +554,274 @@
                 description: 'Комбинация всех техник. Пройди все шаги.',
                 hint: 'Base64 → ROT13 → введи пароль',
                 type: 'final',
-                check: (ans) => ans === gameState.flags[15]
+                check: function(ans) { return ans === flags[15]; }
             }
         ];
 
-        // Инициализация
-        function init() {
-            renderStage();
-            updateProgress();
-        }
-
-        // Отрисовка этапа
         function renderStage() {
-            const area = document.getElementById('gameArea');
+            var area = document.getElementById('gameArea');
             
-            if (gameState.currentStage > 15) {
-                renderCompletion(area);
+            if (currentStage > 15) {
+                area.innerHTML = '<div class="stage-container"><div class="completion-screen"><div class="completion-icon">🏆</div><h2 style="color:#00ff41;margin-bottom:20px;">Поздравляем!</h2><p style="font-size:1.2em;margin-bottom:30px;">Ты прошёл все 15 уровней CTF-15</p><button onclick="resetGame()">Начать заново</button></div></div>';
+                document.getElementById('progressBar').style.width = '100%';
+                document.getElementById('progressBar').textContent = '100%';
                 return;
             }
 
-            const stage = stages[gameState.currentStage - 1];
-            
-            let content = '';
-            
-            // Специфичный контент для разных типов
-            switch(stage.type) {
-                case 'source':
-                    content = `
-                        <div class="task-description">${stage.description}</div>
-                        <div class="task-content">
-                            <input type="text" id="answer" placeholder="Введи флаг...">
-                            <br>
-                            <button onclick="checkAnswer()">Проверить</button>
-                            <button onclick="showHint()">Подсказка</button>
-                        </div>
-                        <div class="hint" id="hint">${stage.hint}</div>
-                        <div id="feedback"></div>
-                    `;
-                    break;
-                    
-                case 'hidden':
-                    content = `
-                        <div class="task-description">${stage.description}</div>
-                        <div class="fake-form">
-                            <h3 style="text-align:center;margin-bottom:20px;">Login</h3>
-                            <label>Username</label>
-                            <input type="text" value="admin" readonly>
-                            <label>Password</label>
-                            <input type="password" value="12345" readonly>
-                            <input type="hidden" id="hiddenFlag" value="${gameState.flags[2]}">
-                            <button style="width:100%;margin-top:20px;" disabled>Login</button>
-                        </div>
-                        <div class="task-content">
-                            <p style="text-align:center;">Найди скрытое поле и введи его значение:</p>
-                            <input type="text" id="answer" placeholder="Значение скрытого поля...">
-                            <br>
-                            <button onclick="checkAnswer()">Проверить</button>
-                            <button onclick="showHint()">Подсказка</button>
-                        </div>
-                        <div class="hint" id="hint">${stage.hint}</div>
-                        <div id="feedback"></div>
-                    `;
-                    break;
-                    
-                case 'cookie':
-                    content = `
-                        <div class="task-description">${stage.description}</div>
-                        <div class="task-content">
-                            <p>Сервер установил cookie. Найди флаг.</p>
-                            <input type="text" id="answer" placeholder="Значение cookie...">
-                            <br>
-                            <button onclick="checkAnswer()">Проверить</button>
-                            <button onclick="showHint()">Подсказка</button>
-                        </div>
-                        <div class="hint" id="hint">${stage.hint}</div>
-                        <div id="feedback"></div>
-                    `;
-                    document.cookie = `flag=${gameState.flags[3]}; path=/`;
-                    break;
-                    
-                case 'base64':
-                    content = `
-                        <div class="task-description">${stage.description}</div>
-                        <div class="cipher-text">${stage.encoded}</div>
-                        <div class="task-content">
-                            <input type="text" id="answer" placeholder="Декодированная строка...">
-                            <br>
-                            <button onclick="checkAnswer()">Проверить</button>
-                            <button onclick="showHint()">Подсказка</button>
-                        </div>
-                        <div class="hint" id="hint">${stage.hint}</div>
-                        <div id="feedback"></div>
-                    `;
-                    break;
-                    
-                case 'rot13':
-                    content = `
-                        <div class="task-description">${stage.description}</div>
-                        <div class="cipher-text">${stage.encoded}</div>
-                        <div class="task-content">
-                            <input type="text" id="answer" placeholder="Расшифрованная строка...">
-                            <br>
-                            <button onclick="checkAnswer()">Проверить</button>
-                            <button onclick="showHint()">Подсказка</button>
-                        </div>
-                        <div class="hint" id="hint">${stage.hint}</div>
-                        <div id="feedback"></div>
-                    `;
-                    break;
-                    
-                case 'caesar':
-                    content = `
-                        <div class="task-description">${stage.description}</div>
-                        <div class="cipher-text">${stage.encoded} (сдвиг: ${stage.shift})</div>
-                        <div class="task-content">
-                            <input type="text" id="answer" placeholder="Расшифрованная строка...">
-                            <br>
-                            <button onclick="checkAnswer()">Проверить</button>
-                            <button onclick="showHint()">Подсказка</button>
-                        </div>
-                        <div class="hint" id="hint">${stage.hint}</div>
-                        <div id="feedback"></div>
-                    `;
-                    break;
-                    
-                case 'invisible':
-                    content = `
-                        <div class="task-description">${stage.description}</div>
-                        <div class="task-content">
-                            <p style="color:#0a0a0a;background:#111;padding:10px;" id="invisibleText">${gameState.flags[7]}</p>
-                            <p style="color:var(--text-dim);font-size:0.9em;">Подсказка: выдели текст на странице</p>
-                            <input type="text" id="answer" placeholder="Найденный текст...">
-                            <br>
-                            <button onclick="checkAnswer()">Проверить</button>
-                            <button onclick="showHint()">Подсказка</button>
-                        </div>
-                        <div class="hint" id="hint">${stage.hint}</div>
-                        <div id="feedback"></div>
-                    `;
-                    break;
-                    
-                case 'headers':
-                    content = `
-                        <div class="task-description">${stage.description}</div>
-                        <div class="task-content">
-                            <p>Открой консоль и посмотри window.serverHeaders</p>
-                            <input type="text" id="answer" placeholder="Значение X-Flag...">
-                            <br>
-                            <button onclick="checkAnswer()">Проверить</button>
-                            <button onclick="showHint()">Подсказка</button>
-                        </div>
-                        <div class="hint" id="hint">${stage.hint}</div>
-                        <div id="feedback"></div>
-                    `;
-                    window.serverHeaders = { 'X-Flag': gameState.flags[8] };
-                    break;
-                    
-                case 'obfuscation':
-                    const obfuscated = btoa(gameState.flags[9]);
-                    content = `
-                        <div class="task-description">${stage.description}</div>
-                        <div class="terminal">
-                            <div class="terminal-line"><span class="terminal-prompt">$</span> eval(atob('${obfuscated}'))</div>
-                        </div>
-                        <div class="task-content">
-                            <input type="text" id="answer" placeholder="Флаг из кода...">
-                            <br>
-                            <button onclick="checkAnswer()">Проверить</button>
-                            <button onclick="showHint()">Подсказка</button>
-                        </div>
-                        <div class="hint" id="hint">${stage.hint}</div>
-                        <div id="feedback"></div>
-                    `;
-                    break;
-                    
-                case 'sqli':
-                    content = `
-                        <div class="task-description">${stage.description}</div>
-                        <div class="fake-form">
-                            <h3 style="text-align:center;margin-bottom:20px;">Database Login</h3>
-                            <label>Username</label>
-                            <input type="text" id="sqlUser" value="admin">
-                            <label>Password</label>
-                            <input type="text" id="sqlPass" placeholder="Введи SQL инъекцию">
-                            <button style="width:100%;margin-top:20px;" onclick="trySQL()">Login</button>
-                            <div id="sqlResult" style="margin-top:15px;"></div>
-                        </div>
-                        <div class="task-content">
-                            <p style="text-align:center;">Когда получится войти, введи payload:</p>
-                            <input type="text" id="answer" placeholder="SQL payload...">
-                            <br>
-                            <button onclick="checkAnswer()">Проверить</button>
-                            <button onclick="showHint()">Подсказка</button>
-                        </div>
-                        <div class="hint" id="hint">${stage.hint}</div>
-                        <div id="feedback"></div>
-                    `;
-                    break;
-                    
-                case 'xss':
-                    content = `
-                        <div class="task-description">${stage.description}</div>
-                        <div id="secret-flag" style="display:none;">${gameState.flags[11]}</div>
-                        <div class="task-content">
-                            <p>Поле для комментария:</p>
-                            <input type="text" id="xssInput" placeholder="<script>...</script>">
-                            <button onclick="tryXSS()">Отправить</button>
-                            <div id="xssOutput" style="margin-top:15px;"></div>
-                            <p style="margin-top:20px;">Введи найденный флаг:</p>
-                            <input type="text" id="answer" placeholder="Флаг...">
-                            <br>
-                            <button onclick="checkAnswer()">Проверить</button>
-                            <button onclick="showHint()">Подсказка</button>
-                        </div>
-                        <div class="hint" id="hint">${stage.hint}</div>
-                        <div id="feedback"></div>
-                    `;
-                    break;
-                    
-                case 'traversal':
-                    content = `
-                        <div class="task-description">${stage.description}</div>
-                        <div class="file-tree">
-                            <div class="folder">/var/www/</div>
-                            <span class="file" onclick="readFile('index.html')">  index.html</span>
-                            <span class="file" onclick="readFile('style.css')">  style.css</span>
-                            <div class="folder">/etc/</div>
-                            <span class="file" onclick="readFile('passwd')">  passwd</span>
-                            <span class="file" onclick="readFile('flag.txt')">  flag.txt</span>
-                        </div>
-                        <div class="task-content">
-                            <p>Или введи путь с ../ :</p>
-                            <input type="text" id="pathInput" placeholder="../../etc/flag.txt">
-                            <button onclick="readPath()">Читать</button>
-                            <div id="pathOutput" style="margin-top:15px;padding:15px;background:var(--bg-primary);border:1px solid var(--border);"></div>
-                            <p style="margin-top:20px;">Введи содержимое flag.txt:</p>
-                            <input type="text" id="answer" placeholder="Содержимое файла...">
-                            <br>
-                            <button onclick="checkAnswer()">Проверить</button>
-                            <button onclick="showHint()">Подсказка</button>
-                        </div>
-                        <div class="hint" id="hint">${stage.hint}</div>
-                        <div id="feedback"></div>
-                    `;
-                    window.vfs = {
-                        'index.html': '<html>...</html>',
-                        'style.css': 'body { color: green; }',
-                        'passwd': 'root:x:0:0:root:/root:/bin/bash',
-                        'flag.txt': 'PT_TRAVERSAL_FLAG'
-                    };
-                    break;
-                    
-                case 'cmdi':
-                    content = `
-                        <div class="task-description">${stage.description}</div>
-                        <div class="terminal" id="cmdTerminal">
-                            <div class="terminal-line"><span class="terminal-prompt">$</span> ping <input type="text" id="cmdInput" style="width:300px;display:inline;background:transparent;border:none;color:var(--text-primary);" placeholder="IP адрес"> <button onclick="runCommand()" style="display:inline;padding:5px 15px;">Run</button></div>
-                            <div id="cmdOutput" style="margin-top:10px;"></div>
-                        </div>
-                        <div class="task-content">
-                            <p>Введи payload с инъекцией:</p>
-                            <input type="text" id="answer" placeholder="127.0.0.1; cat /flag">
-                            <br>
-                            <button onclick="checkAnswer()">Проверить</button>
-                            <button onclick="showHint()">Подсказка</button>
-                        </div>
-                        <div class="hint" id="hint">${stage.hint}</div>
-                        <div id="feedback"></div>
-                    `;
-                    break;
-                    
-                case 'xor':
-                    const xorData = [0x17, 0x05, 0x12, 0x17, 0x13, 0x27, 0x06, 0x13, 0x12, 0x15, 0x17];
-                    content = `
-                        <div class="task-description">${stage.description}</div>
-                        <div class="cipher-text">${xorData.map(b => '0x' + b.toString(16).toUpperCase()).join(' ')}</div>
-                        <p>Ключ: 0x42</p>
-                        <div class="task-content">
-                            <input type="text" id="answer" placeholder="Дешифрованная строка...">
-                            <br>
-                            <button onclick="checkAnswer()">Проверить</button>
-                            <button onclick="showHint()">Подсказка</button>
-                        </div>
-                        <div class="hint" id="hint">${stage.hint}</div>
-                        <div id="feedback"></div>
-                    `;
-                    break;
-                    
-                case 'final':
-                    const step1 = btoa('ebg13_znfgre');
-                    content = `
-                        <div class="task-description">${stage.description}</div>
-                        <div class="task-content">
-                            <h3>Шаг 1: Base64</h3>
-                            <div class="cipher-text">${step1}</div>
-                            <h3>Шаг 2: ROT13</h3>
-                            <p>Расшифруй результат из шага 1</p>
-                            <input type="text" id="bossPass" placeholder="Результат ROT13...">
-                            <button onclick="checkBoss()">Проверить</button>
-                            <div id="bossReveal" style="display:none;margin-top:20px;padding:20px;background:var(--bg-primary);border:1px solid var(--accent);border-radius:4px;">
-                                <p style="color:var(--accent);margin-bottom:15px;">✓ Доступ получен!</p>
-                                <p>Финальный флаг: <strong style="color:var(--accent);font-size:1.3em;">${gameState.flags[15]}</strong></p>
-                            </div>
-                            <p style="margin-top:20px;">Введи финальный флаг:</p>
-                            <input type="text" id="answer" placeholder="Финальный флаг...">
-                            <br>
-                            <button onclick="checkAnswer()">Проверить</button>
-                            <button onclick="showHint()">Подсказка</button>
-                        </div>
-                        <div class="hint" id="hint">${stage.hint}</div>
-                        <div id="feedback"></div>
-                    `;
-                    break;
+            var stage = stages[currentStage - 1];
+            var content = '';
+
+            if (stage.type === 'source') {
+                content = '<div class="task-description">' + stage.description + '</div>' +
+                    '<div class="task-content">' +
+                    '<input type="text" id="answer" placeholder="Введи флаг...">' +
+                    '<br><button onclick="checkAnswer()">Проверить</button>' +
+                    '<button onclick="showHint()">Подсказка</button>' +
+                    '</div>' +
+                    '<div class="hint" id="hint">' + stage.hint + '</div>' +
+                    '<div id="feedback"></div>';
             }
-            
-            area.innerHTML = `
-                <div class="stage-container">
-                    <div class="stage-header">
-                        <div class="stage-number">Уровень ${String(stage.id).padStart(2, '0')} из 15</div>
-                        <h2 class="stage-title">${stage.title}</h2>
-                        <div class="difficulty">Сложность: ${stage.difficulty}</div>
-                    </div>
-                    ${content}
-                    <div class="navigation">
-                        <button onclick="prevStage()" ${gameState.currentStage === 1 ? 'disabled' : ''}>← Назад</button>
-                        <button onclick="nextStage()" id="nextBtn" style="margin-left:auto;">Вперёд →</button>
-                    </div>
-                </div>
-            `;
+            else if (stage.type === 'hidden') {
+                content = '<div class="task-description">' + stage.description + '</div>' +
+                    '<div class="fake-form">' +
+                    '<h3 style="text-align:center;margin-bottom:20px;">Login</h3>' +
+                    '<label>Username</label>' +
+                    '<input type="text" value="admin" readonly>' +
+                    '<label>Password</label>' +
+                    '<input type="password" value="12345" readonly>' +
+                    '<input type="hidden" id="hiddenFlag" value="' + flags[2] + '">' +
+                    '<button style="width:100%;margin-top:20px;" disabled>Login</button>' +
+                    '</div>' +
+                    '<div class="task-content">' +
+                    '<p style="text-align:center;">Найди скрытое поле и введи его значение:</p>' +
+                    '<input type="text" id="answer" placeholder="Значение скрытого поля...">' +
+                    '<br><button onclick="checkAnswer()">Проверить</button>' +
+                    '<button onclick="showHint()">Подсказка</button>' +
+                    '</div>' +
+                    '<div class="hint" id="hint">' + stage.hint + '</div>' +
+                    '<div id="feedback"></div>';
+            }
+            else if (stage.type === 'cookie') {
+                document.cookie = 'flag=' + flags[3] + '; path=/';
+                content = '<div class="task-description">' + stage.description + '</div>' +
+                    '<div class="task-content">' +
+                    '<p>Сервер установил cookie. Найди флаг.</p>' +
+                    '<input type="text" id="answer" placeholder="Значение cookie...">' +
+                    '<br><button onclick="checkAnswer()">Проверить</button>' +
+                    '<button onclick="showHint()">Подсказка</button>' +
+                    '</div>' +
+                    '<div class="hint" id="hint">' + stage.hint + '</div>' +
+                    '<div id="feedback"></div>';
+            }
+            else if (stage.type === 'base64') {
+                content = '<div class="task-description">' + stage.description + '</div>' +
+                    '<div class="cipher-text">' + stage.encoded + '</div>' +
+                    '<div class="task-content">' +
+                    '<input type="text" id="answer" placeholder="Декодированная строка...">' +
+                    '<br><button onclick="checkAnswer()">Проверить</button>' +
+                    '<button onclick="showHint()">Подсказка</button>' +
+                    '</div>' +
+                    '<div class="hint" id="hint">' + stage.hint + '</div>' +
+                    '<div id="feedback"></div>';
+            }
+            else if (stage.type === 'rot13') {
+                content = '<div class="task-description">' + stage.description + '</div>' +
+                    '<div class="cipher-text">' + stage.encoded + '</div>' +
+                    '<div class="task-content">' +
+                    '<input type="text" id="answer" placeholder="Расшифрованная строка...">' +
+                    '<br><button onclick="checkAnswer()">Проверить</button>' +
+                    '<button onclick="showHint()">Подсказка</button>' +
+                    '</div>' +
+                    '<div class="hint" id="hint">' + stage.hint + '</div>' +
+                    '<div id="feedback"></div>';
+            }
+            else if (stage.type === 'caesar') {
+                content = '<div class="task-description">' + stage.description + '</div>' +
+                    '<div class="cipher-text">' + stage.encoded + ' (сдвиг: ' + stage.shift + ')</div>' +
+                    '<div class="task-content">' +
+                    '<input type="text" id="answer" placeholder="Расшифрованная строка...">' +
+                    '<br><button onclick="checkAnswer()">Проверить</button>' +
+                    '<button onclick="showHint()">Подсказка</button>' +
+                    '</div>' +
+                    '<div class="hint" id="hint">' + stage.hint + '</div>' +
+                    '<div id="feedback"></div>';
+            }
+            else if (stage.type === 'invisible') {
+                content = '<div class="task-description">' + stage.description + '</div>' +
+                    '<div class="task-content">' +
+                    '<p style="color:#0a0a0a;background:#111;padding:10px;" id="invisibleText">' + flags[7] + '</p>' +
+                    '<p style="color:#006619;font-size:0.9em;">Подсказка: выдели текст на странице</p>' +
+                    '<input type="text" id="answer" placeholder="Найденный текст...">' +
+                    '<br><button onclick="checkAnswer()">Проверить</button>' +
+                    '<button onclick="showHint()">Подсказка</button>' +
+                    '</div>' +
+                    '<div class="hint" id="hint">' + stage.hint + '</div>' +
+                    '<div id="feedback"></div>';
+            }
+            else if (stage.type === 'headers') {
+                window.serverHeaders = { 'X-Flag': flags[8] };
+                content = '<div class="task-description">' + stage.description + '</div>' +
+                    '<div class="task-content">' +
+                    '<p>Открой консоль и посмотри window.serverHeaders</p>' +
+                    '<input type="text" id="answer" placeholder="Значение X-Flag...">' +
+                    '<br><button onclick="checkAnswer()">Проверить</button>' +
+                    '<button onclick="showHint()">Подсказка</button>' +
+                    '</div>' +
+                    '<div class="hint" id="hint">' + stage.hint + '</div>' +
+                    '<div id="feedback"></div>';
+            }
+            else if (stage.type === 'obfuscation') {
+                var obfuscated = btoa(flags[9]);
+                content = '<div class="task-description">' + stage.description + '</div>' +
+                    '<div class="terminal">' +
+                    '<div>$ eval(atob(\'' + obfuscated + '\'))</div>' +
+                    '</div>' +
+                    '<div class="task-content">' +
+                    '<input type="text" id="answer" placeholder="Флаг из кода...">' +
+                    '<br><button onclick="checkAnswer()">Проверить</button>' +
+                    '<button onclick="showHint()">Подсказка</button>' +
+                    '</div>' +
+                    '<div class="hint" id="hint">' + stage.hint + '</div>' +
+                    '<div id="feedback"></div>';
+            }
+            else if (stage.type === 'sqli') {
+                content = '<div class="task-description">' + stage.description + '</div>' +
+                    '<div class="fake-form">' +
+                    '<h3 style="text-align:center;margin-bottom:20px;">Database Login</h3>' +
+                    '<label>Username</label>' +
+                    '<input type="text" id="sqlUser" value="admin">' +
+                    '<label>Password</label>' +
+                    '<input type="text" id="sqlPass" placeholder="Введи SQL инъекцию">' +
+                    '<button style="width:100%;margin-top:20px;" onclick="trySQL()">Login</button>' +
+                    '<div id="sqlResult" style="margin-top:15px;"></div>' +
+                    '</div>' +
+                    '<div class="task-content">' +
+                    '<p style="text-align:center;">Когда получится войти, введи payload:</p>' +
+                    '<input type="text" id="answer" placeholder="SQL payload...">' +
+                    '<br><button onclick="checkAnswer()">Проверить</button>' +
+                    '<button onclick="showHint()">Подсказка</button>' +
+                    '</div>' +
+                    '<div class="hint" id="hint">' + stage.hint + '</div>' +
+                    '<div id="feedback"></div>';
+            }
+            else if (stage.type === 'xss') {
+                content = '<div class="task-description">' + stage.description + '</div>' +
+                    '<div id="secret-flag" style="display:none;">' + flags[11] + '</div>' +
+                    '<div class="task-content">' +
+                    '<p>Поле для комментария:</p>' +
+                    '<input type="text" id="xssInput" placeholder="<script>...</script>">' +
+                    '<button onclick="tryXSS()">Отправить</button>' +
+                    '<div id="xssOutput" style="margin-top:15px;"></div>' +
+                    '<p style="margin-top:20px;">Введи найденный флаг:</p>' +
+                    '<input type="text" id="answer" placeholder="Флаг...">' +
+                    '<br><button onclick="checkAnswer()">Проверить</button>' +
+                    '<button onclick="showHint()">Подсказка</button>' +
+                    '</div>' +
+                    '<div class="hint" id="hint">' + stage.hint + '</div>' +
+                    '<div id="feedback"></div>';
+            }
+            else if (stage.type === 'traversal') {
+                content = '<div class="task-description">' + stage.description + '</div>' +
+                    '<div class="file-tree">' +
+                    '<div class="folder">/var/www/</div>' +
+                    '<span class="file" onclick="readFile(\'index.html\')">  index.html</span>' +
+                    '<span class="file" onclick="readFile(\'style.css\')">  style.css</span>' +
+                    '<div class="folder">/etc/</div>' +
+                    '<span class="file" onclick="readFile(\'passwd\')">  passwd</span>' +
+                    '<span class="file" onclick="readFile(\'flag.txt\')">  flag.txt</span>' +
+                    '</div>' +
+                    '<div class="task-content">' +
+                    '<p>Или введи путь с ../ :</p>' +
+                    '<input type="text" id="pathInput" placeholder="../../etc/flag.txt">' +
+                    '<button onclick="readPath()">Читать</button>' +
+                    '<div id="pathOutput" style="margin-top:15px;padding:15px;background:#0a0a0a;border:1px solid #222;"></div>' +
+                    '<p style="margin-top:20px;">Введи содержимое flag.txt:</p>' +
+                    '<input type="text" id="answer" placeholder="Содержимое файла...">' +
+                    '<br><button onclick="checkAnswer()">Проверить</button>' +
+                    '<button onclick="showHint()">Подсказка</button>' +
+                    '</div>' +
+                    '<div class="hint" id="hint">' + stage.hint + '</div>' +
+                    '<div id="feedback"></div>';
+            }
+            else if (stage.type === 'cmdi') {
+                content = '<div class="task-description">' + stage.description + '</div>' +
+                    '<div class="terminal" id="cmdTerminal">' +
+                    '<div>$ ping <input type="text" id="cmdInput" style="width:300px;display:inline;background:transparent;border:none;color:#00ff41;" placeholder="IP адрес"> <button onclick="runCommand()" style="display:inline;padding:5px 15px;">Run</button></div>' +
+                    '<div id="cmdOutput" style="margin-top:10px;"></div>' +
+                    '</div>' +
+                    '<div class="task-content">' +
+                    '<p>Введи payload с инъекцией:</p>' +
+                    '<input type="text" id="answer" placeholder="127.0.0.1; cat /flag">' +
+                    '<br><button onclick="checkAnswer()">Проверить</button>' +
+                    '<button onclick="showHint()">Подсказка</button>' +
+                    '</div>' +
+                    '<div class="hint" id="hint">' + stage.hint + '</div>' +
+                    '<div id="feedback"></div>';
+            }
+            else if (stage.type === 'xor') {
+                var xorData = [0x17, 0x05, 0x12, 0x17, 0x13, 0x27, 0x06, 0x13, 0x12, 0x15, 0x17];
+                content = '<div class="task-description">' + stage.description + '</div>' +
+                    '<div class="cipher-text">' + xorData.map(function(b) { return '0x' + b.toString(16).toUpperCase(); }).join(' ') + '</div>' +
+                    '<p>Ключ: 0x42</p>' +
+                    '<div class="task-content">' +
+                    '<input type="text" id="answer" placeholder="Дешифрованная строка...">' +
+                    '<br><button onclick="checkAnswer()">Проверить</button>' +
+                    '<button onclick="showHint()">Подсказка</button>' +
+                    '</div>' +
+                    '<div class="hint" id="hint">' + stage.hint + '</div>' +
+                    '<div id="feedback"></div>';
+            }
+            else if (stage.type === 'final') {
+                var step1 = btoa('ebg13_znfgre');
+                content = '<div class="task-description">' + stage.description + '</div>' +
+                    '<div class="task-content">' +
+                    '<h3>Шаг 1: Base64</h3>' +
+                    '<div class="cipher-text">' + step1 + '</div>' +
+                    '<h3>Шаг 2: ROT13</h3>' +
+                    '<p>Расшифруй результат из шага 1</p>' +
+                    '<input type="text" id="bossPass" placeholder="Результат ROT13...">' +
+                    '<button onclick="checkBoss()">Проверить</button>' +
+                    '<div id="bossReveal" style="display:none;margin-top:20px;padding:20px;background:#0a0a0a;border:1px solid #00ff41;border-radius:4px;">' +
+                    '<p style="color:#00ff41;margin-bottom:15px;">✓ Доступ получен!</p>' +
+                    '<p>Финальный флаг: <strong style="color:#00ff41;font-size:1.3em;">' + flags[15] + '</strong></p>' +
+                    '</div>' +
+                    '<p style="margin-top:20px;">Введи финальный флаг:</p>' +
+                    '<input type="text" id="answer" placeholder="Финальный флаг...">' +
+                    '<br><button onclick="checkAnswer()">Проверить</button>' +
+                    '<button onclick="showHint()">Подсказка</button>' +
+                    '</div>' +
+                    '<div class="hint" id="hint">' + stage.hint + '</div>' +
+                    '<div id="feedback"></div>';
+            }
+
+            area.innerHTML = '<div class="stage-container">' +
+                '<div class="stage-header">' +
+                '<div class="stage-number">Уровень ' + String(stage.id < 10 ? '0' + stage.id : stage.id) + ' из 15</div>' +
+                '<h2 class="stage-title">' + stage.title + '</h2>' +
+                '<div class="difficulty">Сложность: ' + stage.difficulty + '</div>' +
+                '</div>' +
+                content +
+                '<div class="navigation">' +
+                '<button onclick="prevStage()" ' + (currentStage === 1 ? 'disabled' : '') + '>← Назад</button>' +
+                '<button onclick="nextStage()" id="nextBtn" style="margin-left:auto;">Вперёд →</button>' +
+                '</div>' +
+                '</div>';
             
             updateProgress();
-        }
-
-        function checkAnswer() {
-            const input = document.getElementById('answer');
-            const feedback = document.getElementById('feedback');
-            const stage = stages[gameState.currentStage - 1];
-            
-            if (!input || !feedback || !stage) return;
-            
-            const answer = input.value.trim();
-            
-            if (stage.check(answer)) {
-                feedback.className = 'feedback success';
-                feedback.innerHTML = '✓ Правильно! Переход на следующий уровень...';
-                input.disabled = true;
-                
-                if (!gameState.completed.includes(stage.id)) {
-                    gameState.completed.push(stage.id);
-                    localStorage.setItem('ctf_completed', JSON.stringify(gameState.completed));
-                }
-                
-                setTimeout(() => {
-                    gameState.currentStage++;
-                    localStorage.setItem('ctf_stage', gameState.currentStage);
-                    renderStage();
-                }, 1500);
-            } else {
-                feedback.className = 'feedback error';
-                feedback.textContent = '✗ Неправильно. Попробуй ещё раз.';
-                input.style.animation = 'shake 0.5s';
-                setTimeout(() => input.style.animation = '', 500);
-            }
-        }
-
-        function showHint() {
-            const hint = document.getElementById('hint');
-            if (hint) hint.classList.toggle('show');
-        }
-
-        function nextStage() {
-            if (gameState.currentStage < 15) {
-                gameState.currentStage++;
-                localStorage.setItem('ctf_stage', gameState.currentStage);
-                renderStage();
-            }
-        }
-
-        function prevStage() {
-            if (gameState.currentStage > 1) {
-                gameState.currentStage--;
-                localStorage.setItem('ctf_stage', gameState.currentStage);
-                renderStage();
-            }
-        }
-
-        function updateProgress() {
-            const pct = ((gameState.currentStage - 1) / 15) * 100;
-            document.getElementById('progressBar').style.width = pct + '%';
-            document.getElementById('progressBar').textContent = Math.round(pct) + '%';
-            document.getElementById('stageInfo').textContent = `Уровень ${gameState.currentStage} из 15`;
-            document.getElementById('completedInfo').textContent = `Пройдено: ${gameState.completed.length}/15`;
-        }
-
-        function renderCompletion(area) {
-            area.innerHTML = `
-                <div class="stage-container">
-                    <div class="completion-screen">
-                        <div class="completion-icon">🏆</div>
-                        <h2 style="color:var(--accent);margin-bottom:20px;">Поздравляем!</h2>
-                        <p style="font-size:1.2em;margin-bottom:30px;">Ты прошёл все 15 уровней CTF-15</p>
-                        <p style="color:var(--text-dim);margin-bottom:40px;">Ты настоящий хакер!</p>
-                        <button onclick="resetGame()">Начать заново</button>
-                    </div>
-                </div>
-            `;
-            document.getElementById('progressBar').style.width = '100%';
-            document.getElementById('progressBar').textContent = '100%';
         }
 
         function resetGame() {
             if (confirm('Начать сначала? Весь прогресс будет сброшен.')) {
-                gameState.currentStage = 1;
-                gameState.completed = [];
+                currentStage = 1;
+                completed = [];
                 localStorage.setItem('ctf_stage', '1');
                 localStorage.setItem('ctf_completed', '[]');
                 renderStage();
             }
         }
 
-        // Специфичные функции
-        function trySQL() {
-            const pass = document.getElementById('sqlPass').value;
-            const result = document.getElementById('sqlResult');
-            
-            if (pass.toLowerCase().includes('or') || pass.includes('--')) {
-                result.innerHTML = '<span style="color:var(--accent);">✓ Доступ разрешён!</span>';
-                document.getElementById('answer').value = pass;
-            } else {
-                result.innerHTML = '<span style="color:var(--error);">✗ Доступ запрещён</span>';
-            }
-        }
-
-        function tryXSS() {
-            const input = document.getElementById('xssInput').value;
-            const output = document.getElementById('xssOutput');
-            const secret = document.getElementById('secret-flag').innerText;
-            
-            if (input.toLowerCase().includes('<script>')) {
-                output.innerHTML = `<span style="color:var(--accent);">XSS выполнен! Флаг: ${secret}</span>`;
-                document.getElementById('answer').value = secret;
-            } else {
-                output.innerHTML = `<span style="color:var(--text-dim);">Ввод: ${input}</span>`;
-            }
-        }
-
-        function readFile(file) {
-            const content = window.vfs[file] || 'File not found';
-            document.getElementById('pathOutput').textContent = `=== ${file} ===\n${content}`;
-            if (file === 'flag.txt') {
-                document.getElementById('answer').value = content;
-            }
-        }
-
-        function readPath() {
-            const input = document.getElementById('pathInput').value;
-            const output = document.getElementById('pathOutput');
-            
-            if (input.includes('flag') || input.includes('../')) {
-                const content = 'PT_TRAVERSAL_FLAG';
-                output.textContent = `=== /etc/flag.txt ===\n${content}`;
-                document.getElementById('answer').value = content;
-            } else {
-                output.textContent = 'Permission denied';
-            }
-        }
-
-        function runCommand() {
-            const input = document.getElementById('cmdInput').value;
-            const output = document.getElementById('cmdOutput');
-            
-            if (input.includes(';') || input.includes('&&')) {
-                output.innerHTML = '<span style="color:var(--accent);">CMD_INJECTION_SUCCESS</span>';
-                document.getElementById('answer').value = input;
-            } else {
-                output.innerHTML = `PING ${input}: 64 bytes, time=1ms`;
-            }
-        }
-
-        function checkBoss() {
-            const pass = document.getElementById('bossPass').value.toLowerCase();
-            if (pass === 'rot13_master') {
-                document.getElementById('bossReveal').style.display = 'block';
-                document.getElementById('answer').value = gameState.flags[15];
-            } else {
-                alert('Неправильно');
-            }
-        }
-
-        // CSS анимация
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                25% { transform: translateX(-10px); }
-                75% { transform: translateX(10px); }
-            }
-        `;
-        document.head.appendChild(style);
-
         // Запуск
-        init();
+        renderStage();
     </script>
 </body>
 </html>
