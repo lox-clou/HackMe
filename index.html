@@ -1,12 +1,9 @@
-<!-- language: HTML/CSS/JS, file: index.html, target: any modern browser, deploy: GitHub Pages -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CTF-15 // 15 этапов взлома</title>
-<!-- stage 1 hint lives right here, in plain sight -->
-<!-- password: s0urc3_v1ew -->
 <style>
   :root {
     --bg: #0a0e0a;
@@ -26,7 +23,7 @@
     padding: 20px;
     line-height: 1.6;
   }
-  .container { max-width: 1100px; margin: 0 auto; }
+  .container { max-width: 900px; margin: 0 auto; }
   header {
     border-bottom: 1px solid var(--dim);
     padding-bottom: 20px;
@@ -36,157 +33,258 @@
   .subtitle { color: var(--dim); font-size: 0.9em; margin-top: 6px; }
   .progress-bar {
     margin-top: 15px;
-    height: 6px;
+    height: 8px;
     background: var(--bg2);
     border: 1px solid var(--dim);
-    border-radius: 3px;
+    border-radius: 4px;
     overflow: hidden;
   }
   .progress-fill {
     height: 100%;
-    background: var(--accent);
+    background: linear-gradient(90deg, var(--accent), #22c55e);
     width: 0%;
-    transition: width 0.4s;
+    transition: width 0.5s ease;
   }
-  .stats { margin-top: 8px; font-size: 0.85em; color: var(--dim); }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 12px;
+  .stats { 
+    margin-top: 8px; 
+    font-size: 0.9em; 
+    color: var(--accent);
+    display: flex;
+    justify-content: space-between;
   }
-  .stage-card {
+  .stage-container {
     background: var(--bg2);
     border: 1px solid var(--dim);
-    padding: 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
+    border-radius: 8px;
+    padding: 30px;
+    min-height: 400px;
   }
-  .stage-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-  .stage-card.solved { border-color: var(--accent); background: #0f1f12; }
-  .stage-card.solved::after {
-    content: '✓';
-    position: absolute;
-    top: 8px; right: 12px;
-    color: var(--accent);
-    font-size: 1.4em;
+  .stage-header {
+    border-bottom: 1px solid var(--dim);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
   }
-  .stage-num { color: var(--accent); font-size: 0.8em; }
-  .stage-title { font-weight: bold; margin: 4px 0; }
-  .stage-diff { font-size: 0.75em; color: var(--dim); }
-  .modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 100;
-    padding: 20px;
-    overflow-y: auto;
+  .stage-num { 
+    color: var(--accent); 
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
   }
-  .modal.active { display: flex; align-items: flex-start; justify-content: center; }
-  .modal-content {
+  .stage-title { 
+    font-size: 1.8em; 
+    margin: 8px 0;
+    color: var(--fg);
+  }
+  .stage-diff { 
+    color: var(--dim); 
+    font-size: 0.85em;
+  }
+  .task-desc { 
+    margin: 20px 0; 
+    padding: 15px; 
+    background: rgba(74, 222, 128, 0.05);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 4px 4px 0;
+  }
+  .task-content { margin: 25px 0; }
+  input[type="text"], 
+  input[type="password"], 
+  textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--dim);
+    color: var(--fg);
+    padding: 12px;
+    font-family: inherit;
+    font-size: 1em;
+    margin: 10px 0;
+    border-radius: 4px;
+  }
+  input:focus, textarea:focus { 
+    outline: none; 
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.1);
+  }
+  button {
     background: var(--bg);
     border: 1px solid var(--accent);
-    max-width: 800px;
-    width: 100%;
-    padding: 25px;
-    margin-top: 40px;
-    position: relative;
-  }
-  .close-btn {
-    position: absolute;
-    top: 10px; right: 15px;
-    background: none;
-    border: none;
-    color: var(--fg);
-    font-size: 1.5em;
+    color: var(--accent);
+    padding: 10px 24px;
     cursor: pointer;
     font-family: inherit;
+    font-size: 1em;
+    margin: 5px 5px 5px 0;
+    border-radius: 4px;
+    transition: all 0.2s;
   }
-  .close-btn:hover { color: var(--accent); }
-  .task-desc { margin: 15px 0; padding: 12px; background: var(--bg2); border-left: 3px solid var(--accent); }
-  input[type="text"], input[type="password"], textarea {
-    width: 100%;
-    background: var(--bg2);
-    border: 1px solid var(--dim);
-    color: var(--fg);
-    padding: 10px;
-    font-family: inherit;
-    margin: 8px 0;
+  button:hover { 
+    background: var(--accent); 
+    color: var(--bg);
+    transform: translateY(-1px);
   }
-  input:focus, textarea:focus { outline: none; border-color: var(--accent); }
-  button.action {
-    background: var(--bg2);
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .feedback { 
+    margin-top: 15px; 
+    padding: 12px; 
+    font-size: 0.95em;
+    border-radius: 4px;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.ok { 
+    background: rgba(74, 222, 128, 0.1);
     border: 1px solid var(--accent);
     color: var(--accent);
-    padding: 8px 16px;
-    cursor: pointer;
-    font-family: inherit;
-    margin: 4px 4px 4px 0;
   }
-  button.action:hover { background: var(--accent); color: var(--bg); }
-  .feedback { margin-top: 10px; padding: 8px; font-size: 0.9em; }
-  .feedback.ok { color: var(--accent); }
-  .feedback.err { color: var(--err); }
+  .feedback.err { 
+    background: rgba(248, 113, 113, 0.1);
+    border: 1px solid var(--err);
+    color: var(--err);
+  }
   .hint-box {
-    margin-top: 12px;
-    padding: 10px;
-    background: #1a1a0a;
-    border-left: 3px solid var(--warn);
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(251, 191, 36, 0.05);
+    border-left: 4px solid var(--warn);
+    border-radius: 0 4px 4px 0;
     display: none;
     font-size: 0.9em;
   }
   .hint-box.show { display: block; }
+  .nav-buttons {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--dim);
+    display: flex;
+    justify-content: space-between;
+  }
+  .hidden-text { 
+    color: var(--bg); 
+    user-select: none;
+    background: var(--bg2);
+    padding: 2px 4px;
+  }
+  .fake-login { 
+    max-width: 350px; 
+    margin: 20px auto; 
+    padding: 20px; 
+    border: 1px solid var(--dim);
+    border-radius: 4px;
+  }
+  .fake-login label { 
+    display: block; 
+    margin: 8px 0 4px; 
+    font-size: 0.85em; 
+    color: var(--dim);
+  }
+  .file-tree { 
+    font-size: 0.9em; 
+    padding: 15px; 
+    background: var(--bg);
+    border: 1px solid var(--dim);
+    border-radius: 4px;
+    line-height: 1.8;
+  }
+  .file-tree .dir { color: var(--accent); font-weight: bold; }
+  .file-tree .file { 
+    color: var(--fg); 
+    cursor: pointer;
+    padding-left: 20px;
+  }
+  .file-tree .file:hover { 
+    color: var(--accent);
+    text-decoration: underline;
+  }
   .terminal {
     background: #000;
     border: 1px solid var(--dim);
-    padding: 12px;
+    padding: 15px;
     font-size: 0.9em;
-    min-height: 150px;
+    min-height: 120px;
     white-space: pre-wrap;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
   }
   .terminal .prompt { color: var(--accent); }
   .terminal .output { color: var(--fg); }
-  .hidden-text { color: var(--bg); user-select: none; }
-  .fake-login { max-width: 300px; margin: 15px auto; padding: 15px; border: 1px solid var(--dim); }
-  .fake-login label { display: block; margin: 6px 0 2px; font-size: 0.85em; color: var(--dim); }
-  .file-tree { font-size: 0.9em; padding: 10px; background: var(--bg2); }
-  .file-tree .dir { color: var(--accent); }
-  .file-tree .file { color: var(--fg); cursor: pointer; }
-  .file-tree .file:hover { text-decoration: underline; }
-  .cipher-wheel { font-family: monospace; padding: 10px; background: var(--bg2); font-size: 0.95em; }
-  footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--dim); color: var(--dim); font-size: 0.8em; text-align: center; }
+  .locked {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--dim);
+  }
+  .locked-icon {
+    font-size: 4em;
+    margin-bottom: 20px;
+    opacity: 0.5;
+  }
+  .completion {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .completion-icon {
+    font-size: 5em;
+    margin-bottom: 20px;
+    color: var(--accent);
+  }
+  .cipher-text {
+    font-family: monospace;
+    padding: 12px;
+    background: var(--bg);
+    border: 1px solid var(--dim);
+    border-radius: 4px;
+    word-break: break-all;
+    margin: 10px 0;
+  }
+  footer { 
+    margin-top: 40px; 
+    padding-top: 20px; 
+    border-top: 1px solid var(--dim); 
+    color: var(--dim); 
+    font-size: 0.8em; 
+    text-align: center;
+  }
+  @media (max-width: 600px) {
+    .stage-container { padding: 20px; }
+    .stage-title { font-size: 1.4em; }
+  }
 </style>
 </head>
 <body>
 <div class="container">
   <header>
     <h1>&gt; CTF-15_</h1>
-    <div class="subtitle">// 15 этапов. каждый сложнее предыдущего. найди флаг на каждом.</div>
-    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    <div class="stats" id="stats">прогресс: 0 / 15</div>
+    <div class="subtitle">// 15 этапов. каждый сложнее предыдущего.</div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="stats">
+      <span id="stageIndicator">этап 1/15</span>
+      <span id="progressText">0% завершено</span>
+    </div>
   </header>
 
-  <div class="grid" id="grid"></div>
+  <div id="mainContent"></div>
 
   <footer>
-    ctf-15 // образовательный полигон // все уязвимости симулированы локально в браузере
+    ctf-15 // образовательный полигон // все уязвимости симулированы локально
   </footer>
 </div>
 
-<div class="modal" id="modal">
-  <div class="modal-content">
-    <button class="close-btn" onclick="closeModal()">×</button>
-    <div id="modalBody"></div>
-  </div>
-</div>
-
 <script>
-/* ============================================================
-   CTF-15 ENGINE
-   ============================================================ */
-const STORAGE_KEY = 'ctf15_progress_v1';
-let progress = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+// ============================================================
+// CTF-15 ENGINE — SEQUENTIAL MODE
+// ============================================================
+
+const STORAGE_KEY = 'ctf15_sequential_v2';
+let currentStage = parseInt(localStorage.getItem(STORAGE_KEY) || '1');
+let stageAnswers = {};
+
+// Восстанавливаем пройденные этапы
+const completed = JSON.parse(localStorage.getItem('ctf15_completed_v2') || '[]');
 
 const stages = [
   {
@@ -194,214 +292,293 @@ const stages = [
     title: 'Исходный код',
     diff: '★☆☆☆☆',
     desc: 'Флаг спрятан где-то в этой странице. Используй инструменты разработчика (F12) или посмотри исходный код страницы.',
-    hint: 'Правый клик → "Просмотр кода страницы". Ищи комментарии HTML — они выглядят как <!-- ... -->',
+    hint: 'Нажми F12 или правый клик → "Просмотр кода страницы". Ищи HTML-комментарии <!-- ... -->',
     check: (ans) => ans.trim().toLowerCase() === 's0urc3_v1ew',
-    render: () => `<div class="task-desc">${stages[0].desc}</div>
-      <p>Введи найденный пароль:</p>
-      <input type="text" id="ans1" placeholder="флаг...">
-      <button class="action" onclick="submit(1)">проверить</button>
-      <div class="feedback" id="fb1"></div>`
+    render: () => `
+      <div class="task-desc">${stages[0].desc}</div>
+      <div class="task-content">
+        <p>Введи найденный пароль:</p>
+        <input type="text" id="ans1" placeholder="флаг..." autocomplete="off">
+        <br>
+        <button onclick="checkAnswer(1)">проверить</button>
+        <button onclick="showHint(1)">подсказка</button>
+      </div>
+      <div class="feedback" id="fb1"></div>
+      <div class="hint-box" id="hint1">${stages[0].hint}</div>
+    `
   },
   {
     num: 2,
     title: 'Скрытое поле',
     diff: '★☆☆☆☆',
     desc: 'На этой "странице входа" есть секрет. Найди его через инспектор элементов.',
-    hint: 'В HTML есть элемент с атрибутом hidden или type="hidden". Значение value — это флаг.',
+    hint: 'Нажми F12 → Elements. Ищи input с type="hidden". Значение в атрибуте value — это флаг.',
     check: (ans) => ans.trim().toLowerCase() === 'h1dd3n_1nput',
-    render: () => `<div class="task-desc">${stages[1].desc}</div>
+    render: () => `
+      <div class="task-desc">${stages[1].desc}</div>
       <div class="fake-login">
-        <div style="text-align:center;color:var(--dim);">[ форма авторизации ]</div>
-        <label>логин</label><input type="text" value="admin">
-        <label>пароль</label><input type="password" value="12345">
+        <div style="text-align:center;color:var(--dim);margin-bottom:15px;">[ форма авторизации ]</div>
+        <label>логин</label>
+        <input type="text" value="admin" readonly>
+        <label>пароль</label>
+        <input type="password" value="12345" readonly>
         <input type="hidden" id="secret2" value="h1dd3n_1nput">
-        <button class="action" style="width:100%;margin-top:10px;">войти</button>
+        <button style="width:100%;margin-top:15px;" disabled>войти</button>
       </div>
-      <p style="margin-top:15px;">Введи скрытое значение:</p>
-      <input type="text" id="ans2" placeholder="флаг...">
-      <button class="action" onclick="submit(2)">проверить</button>
-      <div class="feedback" id="fb2"></div>`
+      <div class="task-content">
+        <p>Введи скрытое значение:</p>
+        <input type="text" id="ans2" placeholder="флаг..." autocomplete="off">
+        <br>
+        <button onclick="checkAnswer(2)">проверить</button>
+        <button onclick="showHint(2)">подсказка</button>
+      </div>
+      <div class="feedback" id="fb2"></div>
+      <div class="hint-box" id="hint2">${stages[1].hint}</div>
+    `
   },
   {
     num: 3,
     title: 'Cookie',
     diff: '★★☆☆☆',
     desc: 'Сервер выдал тебе сессионную cookie. Найди её и извлеки токен.',
-    hint: 'В консоли браузера: document.cookie. Или F12 → Application → Cookies.',
+    hint: 'Открой консоль (F12 → Console) и введи: document.cookie. Или Application → Cookies.',
     check: (ans) => ans.trim().toLowerCase() === 'c00k1e_m0nst3r',
-    render: () => {
-      document.cookie = "session_token=c00k1e_m0nst3r; path=/";
-      return `<div class="task-desc">${stages[2].desc}</div>
+    init: () => {
+      document.cookie = "session_token=c00k1e_m0nst3r; path=/; SameSite=Strict";
+    },
+    render: () => `
+      <div class="task-desc">${stages[2].desc}</div>
+      <div class="task-content">
         <p>Токен сессии хранится в cookie. Найди его.</p>
-        <input type="text" id="ans3" placeholder="флаг...">
-        <button class="action" onclick="submit(3)">проверить</button>
-        <div class="feedback" id="fb3"></div>`;
-    }
+        <p style="color:var(--dim);font-size:0.9em;">Подсказка: открой консоль браузера (F12)</p>
+        <input type="text" id="ans3" placeholder="флаг..." autocomplete="off">
+        <br>
+        <button onclick="checkAnswer(3)">проверить</button>
+        <button onclick="showHint(3)">подсказка</button>
+      </div>
+      <div class="feedback" id="fb3"></div>
+      <div class="hint-box" id="hint3">${stages[2].hint}</div>
+    `
   },
   {
     num: 4,
     title: 'Base64',
     diff: '★★☆☆☆',
     desc: 'Строка закодирована в Base64. Декодируй её.',
-    hint: 'В консоли: atob("c3RyaW5n") или любой онлайн-декодер.',
+    hint: 'В консоли браузера: atob("YjRzM182NF8xc19uMHRfM25jcnlwdDEwbg==") или онлайн декодер.',
     check: (ans) => ans.trim().toLowerCase() === 'b4s3_64_1s_n0t_3ncrypt10n',
-    render: () => `<div class="task-desc">${stages[3].desc}</div>
-      <p style="font-family:monospace;padding:10px;background:var(--bg2);word-break:break-all;">
-        YjRzM182NF8xc19uMHRfM25jcnlwdDEwbg==
-      </p>
-      <input type="text" id="ans4" placeholder="декодированная строка...">
-      <button class="action" onclick="submit(4)">проверить</button>
-      <div class="feedback" id="fb4"></div>`
+    render: () => `
+      <div class="task-desc">${stages[3].desc}</div>
+      <div class="task-content">
+        <p>Закодированная строка:</p>
+        <div class="cipher-text">YjRzM182NF8xc19uMHRfM25jcnlwdDEwbg==</div>
+        <input type="text" id="ans4" placeholder="декодированная строка..." autocomplete="off">
+        <br>
+        <button onclick="checkAnswer(4)">проверить</button>
+        <button onclick="showHint(4)">подсказка</button>
+      </div>
+      <div class="feedback" id="fb4"></div>
+      <div class="hint-box" id="hint4">${stages[3].hint}</div>
+    `
   },
   {
     num: 5,
     title: 'ROT13',
     diff: '★★☆☆☆',
-    desc: 'Текст зашифрован шифром ROT13 (сдвиг на 13 позиций в алфавите). Расшифруй.',
-    hint: 'ROT13: A↔N, B↔O, ... r→e, B→O. "EBG13" = "ROT13".',
-    check: (ans) => ans.trim().toLowerCase() === 'ebg13_fvzcyr',
-    render: () => `<div class="task-desc">${stages[4].desc}</div>
-      <p style="font-family:monospace;padding:10px;background:var(--bg2);">
-        ebg13_fvzcyr
-      </p>
-      <p style="font-size:0.85em;color:var(--dim);">подсказка: это и есть флаг в ROT13. расшифруй.</p>
-      <input type="text" id="ans5" placeholder="расшифровка...">
-      <button class="action" onclick="submit(5)">проверить</button>
-      <div class="feedback" id="fb5"></div>`
+    desc: 'Текст зашифрован шифром ROT13 (сдвиг на 13 позиций). Расшифруй.',
+    hint: 'ROT13: A↔N, B↔O, ... r→e. "ebg13" расшифровывается как "rot13".',
+    check: (ans) => ans.trim().toLowerCase() === 'rot13_simple',
+    render: () => `
+      <div class="task-desc">${stages[4].desc}</div>
+      <div class="task-content">
+        <p>Зашифрованный текст:</p>
+        <div class="cipher-text">ebg13_fvzcyr</div>
+        <p style="font-size:0.85em;color:var(--dim);">Подсказка: это и есть флаг в ROT13</p>
+        <input type="text" id="ans5" placeholder="расшифровка..." autocomplete="off">
+        <br>
+        <button onclick="checkAnswer(5)">проверить</button>
+        <button onclick="showHint(5)">подсказка</button>
+      </div>
+      <div class="feedback" id="fb5"></div>
+      <div class="hint-box" id="hint5">${stages[4].hint}</div>
+    `
   },
   {
     num: 6,
     title: 'Цезарь',
     diff: '★★★☆☆',
-    desc: 'Шифр Цезаря со сдвигом 7. "L7A3Y_HiA3Y" — найди оригинал.',
-    hint: 'Сдвиг 7: каждая буква сдвинута на 7 вперёд. L→E, 7→0 (цифры тоже сдвинуты). A→T.',
+    desc: 'Шифр Цезаря со сдвигом 7. Расшифруй "L7A3Y_HiA3Y"',
+    hint: 'Сдвиг 7: каждая буква сдвинута на 7 вперёд. L→E, 7→0 (цифры тоже). A→T.',
     check: (ans) => ans.trim().toLowerCase() === 'e0t3p_0a3p0',
-    render: () => `<div class="task-desc">${stages[5].desc}</div>
-      <p style="font-family:monospace;padding:10px;background:var(--bg2);">
-        L7A3Y_HiA3Y
-      </p>
-      <p style="font-size:0.85em;color:var(--dim);">сдвиг = 7. буквы и цифры сдвинуты. A→H, B→I, ..., 0→7, 1→8.</p>
-      <input type="text" id="ans6" placeholder="оригинал...">
-      <button class="action" onclick="submit(6)">проверить</button>
-      <div class="feedback" id="fb6"></div>`
+    render: () => `
+      <div class="task-desc">${stages[5].desc}</div>
+      <div class="task-content">
+        <p>Зашифрованный текст:</p>
+        <div class="cipher-text">L7A3Y_HiA3Y</div>
+        <p style="font-size:0.85em;color:var(--dim);">Сдвиг = 7. Буквы и цифры сдвинуты: A→H, B→I, 0→7, 1→8</p>
+        <input type="text" id="ans6" placeholder="оригинал..." autocomplete="off">
+        <br>
+        <button onclick="checkAnswer(6)">проверить</button>
+        <button onclick="showHint(6)">подсказка</button>
+      </div>
+      <div class="feedback" id="fb6"></div>
+      <div class="hint-box" id="hint6">${stages[5].hint}</div>
+    `
   },
   {
     num: 7,
     title: 'Невидимый текст',
     diff: '★★★☆☆',
     desc: 'На странице есть текст, но его не видно. Найди способ его прочитать.',
-    hint: 'Выдели всё на странице (Ctrl+A) или посмотри CSS — color: #0a0e0a (цвет фона).',
+    hint: 'Выдели всё на странице (Ctrl+A) или посмотри в инспекторе — цвет текста совпадает с фоном.',
     check: (ans) => ans.trim().toLowerCase() === '1nv1s1bl3_1nk',
-    render: () => `<div class="task-desc">${stages[6].desc}</div>
-      <p>Где-то здесь спрятан флаг. Его не видно глазами.</p>
-      <p class="hidden-text">1nv1s1bl3_1nk</p>
-      <p style="color:var(--dim);font-size:0.85em;">попробуй выделить весь текст на странице.</p>
-      <input type="text" id="ans7" placeholder="флаг...">
-      <button class="action" onclick="submit(7)">проверить</button>
-      <div class="feedback" id="fb7"></div>`
+    render: () => `
+      <div class="task-desc">${stages[6].desc}</div>
+      <div class="task-content">
+        <p>Где-то здесь спрятан флаг. Его не видно глазами.</p>
+        <p class="hidden-text">1nv1s1bl3_1nk</p>
+        <p style="color:var(--dim);font-size:0.85em;">Попробуй выделить весь текст (Ctrl+A)</p>
+        <input type="text" id="ans7" placeholder="флаг..." autocomplete="off">
+        <br>
+        <button onclick="checkAnswer(7)">проверить</button>
+        <button onclick="showHint(7)">подсказка</button>
+      </div>
+      <div class="feedback" id="fb7"></div>
+      <div class="hint-box" id="hint7">${stages[6].hint}</div>
+    `
   },
   {
     num: 8,
     title: 'HTTP-заголовки',
     diff: '★★★☆☆',
-    desc: 'Сервер отправил секрет в "заголовках ответа". Найди X-Secret-Flag.',
-    hint: 'Это симуляция. Посмотри JS-объект responseHeaders в коде страницы или в консоли.',
+    desc: 'Сервер отправил секрет в заголовках ответа. Найди X-Secret-Flag.',
+    hint: 'Это симуляция. Посмотри JS-объект window.responseHeaders в консоли.',
     check: (ans) => ans.trim().toLowerCase() === 'h34d3r_h4ck3r',
-    render: () => {
+    init: () => {
       window.responseHeaders = {
         'Content-Type': 'text/html',
         'X-Powered-By': 'CTF-15',
         'X-Secret-Flag': 'h34d3r_h4ck3r',
         'Cache-Control': 'no-store'
       };
-      return `<div class="task-desc">${stages[7].desc}</div>
-        <p>Симулированные заголовки ответа сервера доступны как <code>window.responseHeaders</code>.</p>
-        <p style="font-size:0.85em;color:var(--dim);">в консоли: console.log(window.responseHeaders)</p>
-        <input type="text" id="ans8" placeholder="значение X-Secret-Flag...">
-        <button class="action" onclick="submit(8)">проверить</button>
-        <div class="feedback" id="fb8"></div>`;
-    }
+    },
+    render: () => `
+      <div class="task-desc">${stages[7].desc}</div>
+      <div class="task-content">
+        <p>Симулированные заголовки доступны как <code>window.responseHeaders</code></p>
+        <p style="font-size:0.85em;color:var(--dim);">В консоли: console.log(window.responseHeaders)</p>
+        <input type="text" id="ans8" placeholder="значение X-Secret-Flag..." autocomplete="off">
+        <br>
+        <button onclick="checkAnswer(8)">проверить</button>
+        <button onclick="showHint(8)">подсказка</button>
+      </div>
+      <div class="feedback" id="fb8"></div>
+      <div class="hint-box" id="hint8">${stages[7].hint}</div>
+    `
   },
   {
     num: 9,
     title: 'Обфускация JS',
     diff: '★★★★☆',
     desc: 'Код обфусцирован через eval(atob(...)). Деобфусцируй и найди флаг.',
-    hint: 'Замени eval на console.log и посмотри, что внутри. Или декодируй Base64 вручную.',
+    hint: 'Замени eval на console.log в коде или декодируй Base64 строку вручную.',
     check: (ans) => ans.trim().toLowerCase() === '3v4l_1s_d4ng3r0us',
     render: () => {
       const payload = btoa("const flag = '3v4l_1s_d4ng3r0us'; console.log('flag:', flag);");
-      return `<div class="task-desc">${stages[8].desc}</div>
-        <p>Этот скрипт выполняется при загрузке. Деобфусцируй его:</p>
-        <pre style="background:var(--bg2);padding:10px;font-size:0.85em;overflow-x:auto;">eval(atob("${payload}"));</pre>
-        <input type="text" id="ans9" placeholder="флаг из кода...">
-        <button class="action" onclick="submit(9)">проверить</button>
-        <div class="feedback" id="fb9"></div>`;
+      return `
+        <div class="task-desc">${stages[8].desc}</div>
+        <div class="task-content">
+          <p>Этот скрипт выполняется при загрузке:</p>
+          <pre style="background:var(--bg);padding:12px;border:1px solid var(--dim);border-radius:4px;font-size:0.85em;overflow-x:auto;">eval(atob("${payload}"));</pre>
+          <input type="text" id="ans9" placeholder="флаг из кода..." autocomplete="off">
+          <br>
+          <button onclick="checkAnswer(9)">проверить</button>
+          <button onclick="showHint(9)">подсказка</button>
+        </div>
+        <div class="feedback" id="fb9"></div>
+        <div class="hint-box" id="hint9">${stages[8].hint}</div>
+      `;
     }
   },
   {
     num: 10,
     title: 'SQL-инъекция',
     diff: '★★★★☆',
-    desc: 'Обойди авторизацию через SQL-инъекцию. Запрос: SELECT * FROM users WHERE login=\'$login\' AND password=\'$pass\'',
+    desc: 'Обойди авторизацию через SQL-инъекцию. Попробуй разные payload.',
     hint: 'Классика: \' OR \'1\'=\'1 в поле пароля. Или admin\'--',
     check: (ans) => {
-      const a = ans.trim().toLowerCase();
-      return a.includes("' or ") || a.includes("' or 1=1") || a.includes("admin'--") ||
-             a === "' or ''='" || a.includes("or 1=1") || a.includes("' or '1'='1");
+      const a = ans.toLowerCase();
+      return a.includes("' or ") || a.includes("' or 1=1") || a.includes("admin'--") || 
+             a.includes("' or ''='") || a.includes("or 1=1") || a.includes("' or '1'='1");
     },
-    render: () => `<div class="task-desc">${stages[9].desc}</div>
+    render: () => `
+      <div class="task-desc">${stages[9].desc}</div>
       <div class="fake-login">
-        <label>логин</label><input type="text" id="sql_login" value="admin">
-        <label>пароль (введи инъекцию)</label><input type="text" id="sql_pass">
-        <button class="action" style="width:100%;margin-top:10px;" onclick="trySQL()">войти</button>
+        <label>логин</label>
+        <input type="text" id="sql_login" value="admin">
+        <label>пароль (введи инъекцию)</label>
+        <input type="text" id="sql_pass" placeholder="' OR '1'='1">
+        <button style="width:100%;margin-top:15px;" onclick="trySQL()">войти</button>
         <div id="sql_result" style="margin-top:10px;font-size:0.85em;"></div>
       </div>
-      <p style="margin-top:15px;">Когда обойдёшь — введи саму инъекцию как ответ:</p>
-      <input type="text" id="ans10" placeholder="payload...">
-      <button class="action" onclick="submit(10)">проверить</button>
-      <div class="feedback" id="fb10"></div>`
+      <div class="task-content">
+        <p>Введи payload который сработал:</p>
+        <input type="text" id="ans10" placeholder="' OR '1'='1" autocomplete="off">
+        <br>
+        <button onclick="checkAnswer(10)">проверить</button>
+        <button onclick="showHint(10)">подсказка</button>
+      </div>
+      <div class="feedback" id="fb10"></div>
+      <div class="hint-box" id="hint10">${stages[9].hint}</div>
+    `
   },
   {
     num: 11,
     title: 'XSS',
     diff: '★★★★☆',
-    desc: 'Введи XSS-пейлоад, которая выведет секретный ключ из DOM. Ключ хранится в элементе #xss_secret.',
-    hint: 'Секрет в <span id="xss_secret">...</span>. Твоя задача — прочитать его через инъекцию. Но для сдачи этапа просто введи сам ключ.',
+    desc: 'Найди секретный ключ. Он спрятан в элементе #xss_secret.',
+    hint: 'Открой консоль и введи: document.getElementById("xss_secret").textContent',
     check: (ans) => ans.trim().toLowerCase() === 'xss_k3y_2024',
-    render: () => {
-      return `<div class="task-desc">${stages[10].desc}</div>
-        <span id="xss_secret" style="display:none;">xss_k3y_2024</span>
-        <p>Поле для "комментария" (симуляция XSS):</p>
-        <input type="text" id="xss_input" placeholder="<script>...</script>">
-        <button class="action" onclick="tryXSS()">отправить</button>
+    render: () => `
+      <div class="task-desc">${stages[10].desc}</div>
+      <span id="xss_secret" style="display:none;">xss_k3y_2024</span>
+      <div class="task-content">
+        <p>Поле для "комментария" (симуляция):</p>
+        <input type="text" id="xss_input" placeholder="<script>alert('xss')</script>">
+        <button onclick="tryXSS()">отправить</button>
         <div id="xss_output" style="margin-top:10px;"></div>
-        <p style="margin-top:15px;">Введи секретный ключ:</p>
-        <input type="text" id="ans11" placeholder="ключ...">
-        <button class="action" onclick="submit(11)">проверить</button>
-        <div class="feedback" id="fb11"></div>`;
-    }
+        <p style="margin-top:20px;">Введи секретный ключ:</p>
+        <input type="text" id="ans11" placeholder="ключ..." autocomplete="off">
+        <br>
+        <button onclick="checkAnswer(11)">проверить</button>
+        <button onclick="showHint(11)">подсказка</button>
+      </div>
+      <div class="feedback" id="fb11"></div>
+      <div class="hint-box" id="hint11">${stages[10].hint}</div>
+    `
   },
   {
     num: 12,
     title: 'Path Traversal',
     diff: '★★★★★',
-    desc: 'Прочитай файл /etc/flag.txt через уязвимость path traversal. Ввод: имя файла.',
-    hint: 'Используй ../ чтобы подняться по директориям. Файл находится в /var/www/flag.txt. Твой путь: ../../etc/flag.txt',
+    desc: 'Прочитай файл /etc/flag.txt через path traversal.',
+    hint: 'Используй ../ чтобы подняться. Попробуй: ../../etc/flag.txt',
     check: (ans) => {
-      const a = ans.trim().toLowerCase();
-      return a.includes('../') && (a.includes('flag') || a.includes('etc'));
+      const a = ans.trim();
+      return a === 'PT_TRAVERSAL_M4ST3R';
     },
-    render: () => {
+    init: () => {
       window.vfs = {
         '/var/www/index.html': '<h1>Добро пожаловать</h1>',
         '/var/www/style.css': 'body { color: green; }',
-        '/var/www/../uploads/photo.jpg': '[binary data]',
         '/etc/passwd': 'root:x:0:0:root:/root:/bin/bash',
         '/etc/flag.txt': 'PT_TRAVERSAL_M4ST3R'
       };
-      return `<div class="task-desc">${stages[11].desc}</div>
-        <p>Файловая система сервера (симуляция):</p>
+    },
+    render: () => `
+      <div class="task-desc">${stages[11].desc}</div>
+      <div class="task-content">
+        <p>Файловая система (кликни чтобы прочитать):</p>
         <div class="file-tree">
           <div class="dir">/var/www/</div>
           <div class="file" onclick="readFile('/var/www/index.html')">  index.html</div>
@@ -410,234 +587,376 @@ const stages = [
           <div class="file" onclick="readFile('/etc/passwd')">  passwd</div>
           <div class="file" onclick="readFile('/etc/flag.txt')">  flag.txt</div>
         </div>
-        <p style="margin-top:15px;">Введи путь для чтения (с ../):</p>
+        <p style="margin-top:20px;">Или введи путь с ../ :</p>
         <input type="text" id="path_input" placeholder="../../etc/flag.txt">
-        <button class="action" onclick="readPath()">прочитать</button>
-        <div id="path_output" style="margin-top:10px;padding:8px;background:var(--bg2);"></div>
-        <p style="margin-top:15px;">Введи содержимое flag.txt:</p>
-        <input type="text" id="ans12" placeholder="содержимое...">
-        <button class="action" onclick="submit(12)">проверить</button>
-        <div class="feedback" id="fb12"></div>`;
-    }
+        <button onclick="readPath()">прочитать</button>
+        <div id="path_output" style="margin-top:10px;padding:10px;background:var(--bg);border:1px solid var(--dim);border-radius:4px;"></div>
+        <p style="margin-top:20px;">Введи содержимое flag.txt:</p>
+        <input type="text" id="ans12" placeholder="содержимое..." autocomplete="off">
+        <br>
+        <button onclick="checkAnswer(12)">проверить</button>
+        <button onclick="showHint(12)">подсказка</button>
+      </div>
+      <div class="feedback" id="fb12"></div>
+      <div class="hint-box" id="hint12">${stages[11].hint}</div>
+    `
   },
   {
     num: 13,
     title: 'Command Injection',
     diff: '★★★★★',
-    desc: 'Веб-форма выполняет ping. Инъецируй команду, чтобы прочитать /flag.txt.',
-    hint: 'Разделитель команд: ; или && или |. Попробуй: 127.0.0.1; cat /flag.txt',
+    desc: 'Инъецируй команду чтобы прочитать /flag.txt',
+    hint: 'Разделитель: ; или &&. Попробуй: 127.0.0.1; cat /flag.txt',
     check: (ans) => {
-      const a = ans.trim().toLowerCase();
-      return (a.includes(';') || a.includes('&&') || a.includes('|')) &&
+      const a = ans.toLowerCase();
+      return (a.includes(';') || a.includes('&&') || a.includes('|')) && 
              (a.includes('cat') || a.includes('more') || a.includes('less'));
     },
-    render: () => {
-      return `<div class="task-desc">${stages[13].desc}</div>
-        <p>Форма пинга (симуляция shell):</p>
+    render: () => `
+      <div class="task-desc">${stages[12].desc}</div>
+      <div class="task-content">
+        <p>Форма ping (симуляция):</p>
         <input type="text" id="cmd_input" placeholder="127.0.0.1">
-        <button class="action" onclick="runCmd()">выполнить</button>
-        <div class="terminal" id="cmd_output"><span class="prompt">$ </span><span class="output">ожидание команды...</span></div>
-        <p style="margin-top:15px;">Введи сам payload (с инъекцией):</p>
-        <input type="text" id="ans13" placeholder="127.0.0.1; cat /flag.txt">
-        <button class="action" onclick="submit(13)">проверить</button>
-        <div class="feedback" id="fb13"></div>`;
-    }
+        <button onclick="runCmd()">выполнить</button>
+        <div class="terminal" id="cmd_output"><span class="prompt">$ </span><span class="output">ожидание...</span></div>
+        <p style="margin-top:20px;">Введи payload:</p>
+        <input type="text" id="ans13" placeholder="127.0.0.1; cat /flag.txt" autocomplete="off">
+        <br>
+        <button onclick="checkAnswer(13)">проверить</button>
+        <button onclick="showHint(13)">подсказка</button>
+      </div>
+      <div class="feedback" id="fb13"></div>
+      <div class="hint-box" id="hint13">${stages[12].hint}</div>
+    `
   },
   {
     num: 14,
     title: 'XOR-шифр',
     diff: '★★★★★',
-    desc: 'Текст зашифрован XOR с ключом 0x42. Дешифруй: \\x26\\x25\\x2c\\x25\\x27\\x62\\x30\\x27\\x28\\x2d\\x26\\x62\\x27\\x2c\\x25',
-    hint: 'XOR каждый байт с 0x42. В консоли: String.fromCharCode(...[...hex].map(b => b ^ 0x42))',
+    desc: 'Текст зашифрован XOR с ключом 0x42. Дешифруй.',
+    hint: 'XOR каждый байт с 0x42. В консоли: String.fromCharCode(...[0x26,0x25,...].map(b => b ^ 0x42))',
     check: (ans) => ans.trim().toLowerCase() === 'x0r_1s_r3v3rs1bl3',
-    render: () => {
-      const cipher = [0x26,0x25,0x2c,0x25,0x27,0x62,0x30,0x27,0x28,0x2d,0x26,0x62,0x27,0x2c,0x25];
-      return `<div class="task-desc">${stages[13].desc}</div>
+    render: () => `
+      <div class="task-desc">${stages[13].desc}</div>
+      <div class="task-content">
         <p>Шифротекст (hex):</p>
-        <pre style="background:var(--bg2);padding:10px;font-size:0.85em;">26 25 2c 25 27 62 30 27 28 2d 26 62 27 2c 25</pre>
+        <div class="cipher-text">26 25 2c 25 27 62 30 27 28 2d 26 62 27 2c 25</div>
         <p>Ключ XOR: <code>0x42</code></p>
-        <p style="font-size:0.85em;color:var(--dim);">подсказка: XOR обратим. каждый байт ^ 0x42 = оригинал.</p>
-        <input type="text" id="ans14" placeholder="дешифрованный текст...">
-        <button class="action" onclick="submit(14)">проверить</button>
-        <div class="feedback" id="fb14"></div>`;
-    }
+        <p style="font-size:0.85em;color:var(--dim);">Подсказка: каждый байт ^ 0x42 = оригинал</p>
+        <input type="text" id="ans14" placeholder="дешифрованный текст..." autocomplete="off">
+        <br>
+        <button onclick="checkAnswer(14)">проверить</button>
+        <button onclick="showHint(14)">подсказка</button>
+      </div>
+      <div class="feedback" id="fb14"></div>
+      <div class="hint-box" id="hint14">${stages[13].hint}</div>
+    `
   },
   {
     num: 15,
     title: 'Финальный босс',
     diff: '★★★★★',
-    desc: 'Комбинация: декодируй Base64, затем расшифруй ROT13, затем найди скрытое поле в HTML.',
-    hint: 'Шаг 1: Base64 decode → "ebg13_znfgre" → Шаг 2: ROT13 → "rot13_master" → Шаг 3: это пароль для скрытого поля ниже.',
+    desc: 'Комбинация: Base64 → ROT13 → скрытое поле',
+    hint: 'Base64 decode → "ebg13_znfgre" → ROT13 → "rot13_master" → введи в поле ниже',
     check: (ans) => ans.trim().toLowerCase() === 'f1n4l_b0ss_d3f34t3d',
     render: () => {
       const step1 = btoa('ebg13_znfgre');
-      return `<div class="task-desc">${stages[14].desc}</div>
-        <p><strong>Шаг 1:</strong> Декодируй Base64:</p>
-        <pre style="background:var(--bg2);padding:10px;">${step1}</pre>
-        <p><strong>Шаг 2:</strong> Результат — ROT13. Расшифруй.</p>
-        <p><strong>Шаг 3:</strong> Полученная строка — пароль к скрытому полю ниже. Введи его, чтобы открыть финальный флаг.</p>
-        <input type="password" id="boss_pass" placeholder="пароль от шага 2...">
-        <button class="action" onclick="tryBoss()">разблокировать</button>
-        <div id="boss_reveal" style="display:none;margin-top:15px;padding:15px;background:var(--bg2);border:1px solid var(--accent);">
-          <p style="color:var(--accent);">✓ доступ получен. финальный флаг:</p>
-          <p style="font-size:1.2em;margin-top:10px;">f1n4l_b0ss_d3f34t3d</p>
+      return `
+        <div class="task-desc">${stages[14].desc}</div>
+        <div class="task-content">
+          <p><strong>Шаг 1:</strong> Декодируй Base64:</p>
+          <div class="cipher-text">${step1}</div>
+          <p><strong>Шаг 2:</strong> Результат — ROT13. Расшифруй.</p>
+          <p><strong>Шаг 3:</strong> Полученная строка — пароль к полю ниже:</p>
+          <input type="password" id="boss_pass" placeholder="пароль от шага 2...">
+          <button onclick="tryBoss()">разблокировать</button>
+          <div id="boss_reveal" style="display:none;margin-top:15px;padding:15px;background:var(--bg);border:1px solid var(--accent);border-radius:4px;">
+            <p style="color:var(--accent);">✓ доступ получен. финальный флаг:</p>
+            <p style="font-size:1.3em;margin-top:10px;color:var(--fg);">f1n4l_b0ss_d3f34t3d</p>
+          </div>
+          <p style="margin-top:20px;">Введи финальный флаг:</p>
+          <input type="text" id="ans15" placeholder="флаг..." autocomplete="off">
+          <br>
+          <button onclick="checkAnswer(15)">проверить</button>
+          <button onclick="showHint(15)">подсказка</button>
         </div>
-        <p style="margin-top:15px;">Введи финальный флаг:</p>
-        <input type="text" id="ans15" placeholder="флаг...">
-        <button class="action" onclick="submit(15)">проверить</button>
-        <div class="feedback" id="fb15"></div>`;
+        <div class="feedback" id="fb15"></div>
+        <div class="hint-box" id="hint15">${stages[14].hint}</div>
+      `;
     }
   }
 ];
 
-/* ============================================================
-   UI RENDER
-   ============================================================ */
-function renderGrid() {
-  const grid = document.getElementById('grid');
-  grid.innerHTML = stages.map(s => `
-    <div class="stage-card ${progress[s.num] ? 'solved' : ''}" onclick="openStage(${s.num})">
-      <div class="stage-num">этап ${String(s.num).padStart(2,'0')}</div>
-      <div class="stage-title">${s.title}</div>
-      <div class="stage-diff">${s.diff}</div>
+// ============================================================
+// CORE FUNCTIONS
+// ============================================================
+
+function renderStage() {
+  const container = document.getElementById('mainContent');
+  
+  if (currentStage > 15) {
+    // Все этапы пройдены
+    container.innerHTML = `
+      <div class="stage-container">
+        <div class="completion">
+          <div class="completion-icon">🏆</div>
+          <h2 style="color:var(--accent);margin-bottom:15px;">Поздравляем!</h2>
+          <p style="color:var(--fg);margin-bottom:20px;">Ты прошёл все 15 этапов CTF-15</p>
+          <p style="color:var(--dim);">Ты настоящий хакер!</p>
+          <button onclick="resetProgress()" style="margin-top:30px;">начать заново</button>
+        </div>
+      </div>
+    `;
+    updateProgress(15);
+    return;
+  }
+  
+  const stage = stages[currentStage - 1];
+  
+  container.innerHTML = `
+    <div class="stage-container">
+      <div class="stage-header">
+        <div class="stage-num">этап ${String(stage.num).padStart(2, '0')} из 15</div>
+        <h2 class="stage-title">${stage.title}</h2>
+        <div class="stage-diff">сложность: ${stage.diff}</div>
+      </div>
+      ${stage.render()}
+      <div class="nav-buttons">
+        <button onclick="prevStage()" ${currentStage === 1 ? 'disabled' : ''}>← предыдущий</button>
+        <button onclick="nextStage()" id="nextBtn" disabled>следующий →</button>
+      </div>
     </div>
-  `).join('');
-  updateProgress();
-}
-
-function updateProgress() {
-  const done = Object.keys(progress).length;
-  const pct = (done / stages.length) * 100;
-  document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('stats').textContent = `прогресс: ${done} / ${stages.length}`;
-}
-
-function openStage(num) {
-  const s = stages.find(x => x.num === num);
-  const body = document.getElementById('modalBody');
-  body.innerHTML = `
-    <h2 style="color:var(--accent);">этап ${s.num}: ${s.title}</h2>
-    <div style="color:var(--dim);font-size:0.85em;margin-top:4px;">${s.diff}</div>
-    ${s.render()}
-    <button class="action" style="margin-top:15px;" onclick="toggleHint(${s.num})">подсказка</button>
-    <div class="hint-box" id="hint${s.num}">${s.hint}</div>
-    ${progress[s.num] ? '<div class="feedback ok" style="margin-top:10px;">✓ этап пройден</div>' : ''}
   `;
-  document.getElementById('modal').classList.add('active');
+  
+  // Инициализация этапа если есть
+  if (stage.init) stage.init();
+  
+  updateProgress(currentStage - 1);
 }
 
-function closeModal() {
-  document.getElementById('modal').classList.remove('active');
-}
-
-function toggleHint(num) {
-  document.getElementById('hint' + num).classList.toggle('show');
-}
-
-function submit(num) {
-  const s = stages.find(x => x.num === num);
-  const ans = document.getElementById('ans' + num).value;
-  const fb = document.getElementById('fb' + num);
-  if (s.check(ans)) {
-    fb.textContent = '✓ верно! этап пройден.';
-    fb.className = 'feedback ok';
-    progress[num] = true;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-    renderGrid();
+function checkAnswer(stageNum) {
+  const stage = stages[stageNum - 1];
+  const input = document.getElementById(`ans${stageNum}`);
+  const feedback = document.getElementById(`fb${stageNum}`);
+  const nextBtn = document.getElementById('nextBtn');
+  
+  if (!input || !feedback) return;
+  
+  const answer = input.value;
+  
+  if (stage.check(answer)) {
+    // Правильный ответ
+    feedback.textContent = '✓ верно! этап пройден.';
+    feedback.className = 'feedback ok show';
+    input.disabled = true;
+    
+    // Сохраняем прогресс
+    if (!completed.includes(stageNum)) {
+      completed.push(stageNum);
+      localStorage.setItem('ctf15_completed_v2', JSON.stringify(completed));
+    }
+    
+    // Разблокируем следующий этап
+    if (nextBtn) {
+      nextBtn.disabled = false;
+      nextBtn.onclick = () => {
+        currentStage++;
+        localStorage.setItem(STORAGE_KEY, currentStage.toString());
+        renderStage();
+      };
+    }
+    
+    // Автоматически переходим к следующему через 2 секунды
+    setTimeout(() => {
+      if (nextBtn && !nextBtn.disabled) {
+        nextBtn.click();
+      }
+    }, 2000);
+    
   } else {
-    fb.textContent = '✗ неверно. попробуй ещё.';
-    fb.className = 'feedback err';
+    // Неправильный ответ
+    feedback.textContent = '✗ неверно. попробуй ещё.';
+    feedback.className = 'feedback err show';
+    
+    // Анимация тряски
+    input.style.animation = 'shake 0.5s';
+    setTimeout(() => input.style.animation = '', 500);
   }
 }
 
-/* ============================================================
-   STAGE-SPECIFIC LOGIC
-   ============================================================ */
+function showHint(stageNum) {
+  const hint = document.getElementById(`hint${stageNum}`);
+  if (hint) {
+    hint.classList.toggle('show');
+  }
+}
+
+function nextStage() {
+  if (currentStage < 15) {
+    currentStage++;
+    localStorage.setItem(STORAGE_KEY, currentStage.toString());
+    renderStage();
+  }
+}
+
+function prevStage() {
+  if (currentStage > 1) {
+    currentStage--;
+    localStorage.setItem(STORAGE_KEY, currentStage.toString());
+    renderStage();
+  }
+}
+
+function updateProgress(stage) {
+  const pct = (stage / 15) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('stageIndicator').textContent = `этап ${stage}/15`;
+  document.getElementById('progressText').textContent = `${Math.round(pct)}% завершено`;
+}
+
+function resetProgress() {
+  if (confirm('начать заново? весь прогресс будет сброшен.')) {
+    currentStage = 1;
+    completed.length = 0;
+    localStorage.setItem(STORAGE_KEY, '1');
+    localStorage.setItem('ctf15_completed_v2', '[]');
+    renderStage();
+  }
+}
+
+// ============================================================
+// STAGE-SPECIFIC FUNCTIONS
+// ============================================================
+
 function trySQL() {
   const login = document.getElementById('sql_login').value;
   const pass = document.getElementById('sql_pass').value;
+  const result = document.getElementById('sql_result');
+  
   const query = `SELECT * FROM users WHERE login='${login}' AND password='${pass}'`;
-  const res = document.getElementById('sql_result');
-  // симуляция: если инъекция содержит OR или --, считаем что bypass прошёл
-  if (pass.includes("' OR ") || pass.includes("' or ") || pass.includes("--") || pass.includes("OR 1=1")) {
-    res.innerHTML = `<span style="color:var(--accent);">✓ авторизация обойдена!</span><br><small style="color:var(--dim);">запрос: ${query}</small>`;
+  
+  if (pass.includes("' OR ") || pass.toLowerCase().includes("' or ") || 
+      pass.includes("--") || pass.toLowerCase().includes("or 1=1")) {
+    result.innerHTML = `<span style="color:var(--accent);">✓ авторизация обойдена!</span><br><small style="color:var(--dim);">${query}</small>`;
+    // Автозаполняем поле ответа
+    const ansInput = document.getElementById('ans10');
+    if (ansInput && !ansInput.value) {
+      ansInput.value = pass;
+    }
   } else {
-    res.innerHTML = `<span style="color:var(--err);">✗ доступ запрещён</span><br><small style="color:var(--dim);">запрос: ${query}</small>`;
+    result.innerHTML = `<span style="color:var(--err);">✗ доступ запрещён</span><br><small style="color:var(--dim);">${query}</small>`;
   }
 }
 
 function tryXSS() {
   const input = document.getElementById('xss_input').value;
-  const out = document.getElementById('xss_output');
-  // симуляция: если есть <script>, показываем что "выполнилось"
+  const output = document.getElementById('xss_output');
+  
   if (input.toLowerCase().includes('<script>')) {
     const secret = document.getElementById('xss_secret').textContent;
-    out.innerHTML = `<span style="color:var(--accent);">✓ скрипт выполнен. секрет: ${secret}</span>`;
+    output.innerHTML = `<span style="color:var(--accent);">✓ скрипт выполнен! секрет: ${secret}</span>`;
+    // Автозаполняем
+    const ansInput = document.getElementById('ans11');
+    if (ansInput && !ansInput.value) {
+      ansInput.value = secret;
+    }
   } else {
-    out.innerHTML = `<span style="color:var(--dim);">ввод: ${input}</span>`;
+    output.innerHTML = `<span style="color:var(--dim);">ввод: ${input}</span>`;
   }
 }
 
 function readFile(path) {
   const content = window.vfs[path] || '[файл не найден]';
-  document.getElementById('path_output').textContent = content;
+  const output = document.getElementById('path_output');
+  if (output) {
+    output.textContent = `путь: ${path}\nсодержимое: ${content}`;
+  }
 }
 
 function readPath() {
   const input = document.getElementById('path_input').value;
-  const out = document.getElementById('path_output');
-  // симуляция: нормализуем путь
+  const output = document.getElementById('path_output');
+  
+  if (!input || !output) return;
+  
   let resolved = '/var/www/' + input;
-  // простая нормализация ../
   const parts = resolved.split('/');
   const stack = [];
+  
   for (const p of parts) {
     if (p === '..') stack.pop();
     else if (p && p !== '.') stack.push(p);
   }
+  
   const finalPath = '/' + stack.join('/');
   const content = window.vfs[finalPath] || window.vfs['/' + input.replace(/^\.\.\//, '')] || '[файл не найден]';
-  out.textContent = `путь: ${finalPath}\nсодержимое: ${content}`;
+  
+  output.textContent = `путь: ${finalPath}\nсодержимое: ${content}`;
+  
+  // Если нашли флаг, автозаполняем
+  if (content === 'PT_TRAVERSAL_M4ST3R') {
+    const ansInput = document.getElementById('ans12');
+    if (ansInput && !ansInput.value) {
+      ansInput.value = content;
+    }
+  }
 }
 
 function runCmd() {
   const input = document.getElementById('cmd_input').value;
-  const out = document.getElementById('cmd_output');
-  // симуляция: если есть разделитель, выполняем "вторую команду"
+  const output = document.getElementById('cmd_output');
+  
+  if (!input || !output) return;
+  
   let response = '';
+  
   if (input.includes(';') || input.includes('&&') || input.includes('|')) {
     const parts = input.split(/;|&&|\|/);
-    const cmd = parts[1]?.trim() || '';
+    const cmd = (parts[1] || '').trim();
+    
     if (cmd.includes('cat /flag') || cmd.includes('cat flag')) {
       response = 'CMD_INJECTION_SUCCESS_2024';
     } else {
-      response = `[simulated output of: ${cmd}]`;
+      response = `[выполнено: ${cmd}]`;
     }
   } else {
     response = `PING ${input}: 64 bytes, time=1ms`;
   }
-  out.innerHTML = `<span class="prompt">$ </span><span class="output">${input}\n${response}</span>`;
+  
+  output.innerHTML = `<span class="prompt">$ </span><span class="output">${input}\n${response}</span>`;
 }
 
 function tryBoss() {
   const pass = document.getElementById('boss_pass').value;
+  const reveal = document.getElementById('boss_reveal');
+  
   if (pass.toLowerCase() === 'rot13_master') {
-    document.getElementById('boss_reveal').style.display = 'block';
+    reveal.style.display = 'block';
+    // Автозаполняем финальный флаг
+    const ansInput = document.getElementById('ans15');
+    if (ansInput && !ansInput.value) {
+      setTimeout(() => ansInput.value = 'f1n4l_b0ss_d3f34t3d', 500);
+    }
   } else {
     alert('неверный пароль');
   }
 }
 
-/* ============================================================
-   INIT
-   ============================================================ */
-renderGrid();
-document.getElementById('modal').addEventListener('click', (e) => {
-  if (e.target.id === 'modal') closeModal();
-});
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closeModal();
-});
+// Добавляем CSS анимацию
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+  }
+`;
+document.head.appendChild(style);
+
+// ============================================================
+// INIT
+// ============================================================
+renderStage();
 </script>
 </body>
 </html>
