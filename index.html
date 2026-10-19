@@ -7,8 +7,8 @@
     <!-- CSS -->
     <style>
         body {
-            font-family: 'Courier New', Courier, monospace;
-            background-color: #232323;
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #0a0e1a;
             color: #ffffff;
             margin: 0;
             display: flex;
@@ -22,19 +22,16 @@
             background-color: #333;
             padding: 20px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #fff;
-        }
-        p {
-            margin-bottom: 15px;
+            border-radius: 8px;
         }
         .level {
             margin-top: 20px;
+            position: relative;
         }
         .level-title {
             font-size: 1.5em;
             color: #ff7347;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .level-content {
             border: 1px solid #ddd;
@@ -55,120 +52,253 @@
             cursor: pointer;
             border-radius: 4px;
         }
+        .level-content .hint {
+            font-size: 1.2em;
+            color: #ff7347;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .level-content .flag {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ff7347;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar {
+            width: 280px;
+            background-color: #333;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            background-color: #282c32;
+            color: #ffffff;
+        }
+        .sidebar li {
+            padding: 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease-in-out;
+        }
+        .sidebar li:hover {
+            transform: translateY(-5px);
+        }
+        .sidebar li.completed {
+            background-color: #4caf50;
+            color: #fff;
+        }
+        .level-container {
+            max-width: calc(100% - 280px);
+            padding-left: 300px;
+        }
+        .code-block {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #333;
+            color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .code-block pre {
+            margin: 0;
+            padding: 0;
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #f8f9fa;
+            color: #333;
+            overflow-x: auto;
+        }
+        .terminal-output {
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+            border-radius: 8px;
+            background-color: #333;
+            color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .terminal-output pre {
+            margin: 0;
+            padding: 0;
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #f8f9fa;
+            color: #333;
+            overflow-x: auto;
+        }
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Codeville CTF</h1>
-
-    <div id="levels"></div>
-
-    <script src="scripts.js"></script>
+    <div id="sidebar"></div>
+    <div class="level-container" id="levels"></div>
+    <div id="terminal-output"></div>
 </div>
-
-<!-- Level HTML -->
-<div id="level-content" style="display: none;"></div>
 
 <script>
 // Define the levels with their descriptions, vulnerable interfaces, flag input, hint system, and solution explanation
 const levels = [
     {
-        title: 'SQL Injection (Login Bypass)',
-        description: 'The login form is vulnerable to SQL injection. Try the payload ` OR 1='1` to bypass authentication.',
+        title: 'SQL Injection Login (Easy)',
+        description: 'The login form is vulnerable to SQL injection. Try the payload `admin' OR '1'='1` to bypass authentication.',
         input: 'username=guest&password=OR+1%3D1',
         hint: 'Check the query parameters in the URL and see if there\'s a way to inject values.',
-        solution: 'The flag is displayed on the login page. The payload ` OR 1='1` bypasses the authentication check.'
+        solution: 'The flag is displayed on the login page. The payload `admin' OR '1'='1` bypasses the authentication check.'
     },
     {
-        title: 'Reflected XSS (Input Field)',
-        description: 'The input field renders user input as HTML. Try the string `<script>alert('XSS')</script>` to trigger the alert and capture the flag.',
-        input: 'username=<script>alert('XSS')</script>',
+        title: 'Reflected XSS (Easy)',
+        description: 'The search box renders user input as HTML, payload: <script>document.getElementById('flag').style.display='block'</script>',
+        input: 'username=<script>document.getElementById('flag').style.display='block'</script>',
         hint: 'Check the query parameters in the URL and see if there\'s a way to inject values.',
-        solution: 'The flag is displayed on the login page. The payload `<script>alert('XSS')</script>` triggers the alert.'
+        solution: 'The flag is displayed on the login page. The payload `<script>document.getElementById('flag').style.display='block'</script>` triggers the alert.'
     },
     {
-        title: 'Command Injection (Ping Tool)',
-        description: 'The "ping" tool is vulnerable to command injection. Try the IP `127.0.0.1; cat /etc/passwd` to reveal the flag in the simulated output.',
+        title: 'Command Injection (Medium)',
+        description: 'The ping tool is vulnerable to command injection. Try the IP `127.0.0.1 && cat flag.txt` to reveal the flag in the simulated output.',
         input: 'ip=127.0.0.1;',
         hint: 'Check the URL parameters and see if there\'s a way to inject values.',
-        solution: 'The flag is displayed on the login page. The payload `127.0.0.1; cat /etc/passwd` reveals the flag.'
+        solution: 'The flag is displayed on the login page. The payload `127.0.0.1 && cat flag.txt` reveals the flag.'
     },
     {
-        title: 'Directory Traversal (File Viewer)',
-        description: 'The file viewer app can be used to navigate to any directory. Try the URL `/user?id=2` to view the admin profile and capture the flag.',
+        title: 'Directory Traversal (Medium)',
+        description: 'File viewer app with parameter ?file=report.txt. User changes to ?file=../../../flag.txt to read hidden file.',
         input: '?file=../../../flag.txt',
         hint: 'Check the query parameters in the URL and see if there\'s a way to navigate to other directories.',
         solution: 'The flag is displayed on the user profile page. The payload `/user?id=2` navigates to the admin profile.'
     },
     {
-        title: 'Brute Force Authentication (Weak Password)',
-        description: 'The login form uses a weak password. Try common passwords like `password123`, `admin`, or `letmein`. Count the attempts and capture the flag.',
+        title: 'Brute Force (Easy)',
+        description: 'Login with password list, 5 attempts shown, correct: password123',
         input: 'username=guest&password=password123',
         hint: 'Check the query parameters in the URL and see if there\'s a way to try different passwords.',
         solution: 'The flag is displayed on the login page. The payload `username=guest&password=password123` counts attempts and reveals the flag.'
     },
     {
-        title: 'IDOR (Insecure Direct Object Reference)',
-        description: 'The user profile page can be used to view different profiles. Try navigating to `/user?id=1` to see the admin profile and capture the flag.',
+        title: 'IDOR (Medium)',
+        description: 'User profile by ID, change id=1 to id=99 for admin',
         input: '?id=2',
         hint: 'Check the query parameters in the URL and see if there\'s a way to navigate to other profiles.',
         solution: 'The flag is displayed on the user profile page. The payload `/user?id=1` navigates to the admin profile.'
     },
     {
-        title: 'CSRF Attack (Bank Transfer Form)',
-        description: 'The bank transfer form can be used to make a transfer between accounts. Try crafting an HTML page that auto-submits the transfer to another account.',
+        title: 'CSRF (Hard)',
+        description: 'Bank transfer, craft hidden form that auto-submits',
         input: '<form action="/transfer" method="post"><input type="hidden" name="to" value="attacker@localhost" /><input type="hidden" name="amount" value="10" /><button type="submit">Transfer</button></form>',
-        hint: 'Check the form and the URL parameters to see if there\'s a way to craft a form that auto-submits the transfer.',
+        hint: 'Check the form and the URL parameters to see if there\'s a way to craft a form that auto-submits.',
         solution: 'The flag is displayed on the user profile page. The payload crafts a form to transfer funds.'
     },
     {
-        title: 'Unrestricted File Upload (Image Viewer)',
-        description: 'The upload form can be used to upload images. Try uploading a `.php` or `.txt` file and capture the flag.',
+        title: 'File Upload Bypass (Hard)',
+        description: 'Upload .jpg with embedded PHP, rename to .php',
         input: '<form action="/upload" method="post"><input type="file" name="image" /><button type="submit">Upload</button></form>',
         hint: 'Check the file input element and the form submission to see if there\'s a way to upload files.',
         solution: 'The flag is displayed on the uploaded image page. The payload uploads an image file and reveals the flag.'
     },
     {
-        title: 'JWT Token Manipulation (Admin Panel)',
-        description: 'The admin panel can be accessed by logging in as `admin`. Try decoding the token, changing the role to "admin", and re-encoding it.',
+        title: 'JWT Manipulation (Expert)',
+        description: 'Decode/modify/encode JWT, change role to admin',
         input: '<input type="hidden" name="token" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf3nrLWkWBsEd44uD03e8" />',
         hint: 'Check the hidden input and the token encoding to see if there\'s a way to modify the token.',
         solution: 'The flag is displayed on the admin panel. The payload changes the role from "user" to "admin".'
     }
 ];
 
-// Function to create and display the levels
-function createLevels() {
-    const levelContent = document.getElementById('level-content');
-    levelContent.style.display = 'block';
+// Function to create and display the sidebar
+function createSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.innerHTML = `
+        <ul>
+            ${levels.map(level => `<li data-level="${level.title}">${level.title}</li>`).join('')}
+        </ul>
+    `;
+}
 
-    levels.forEach(level => {
-        const div = document.createElement('div');
-        div.className = 'level';
-        div.innerHTML = `
-            <h2 class="level-title">${level.title}</h2>
-            <p>${level.description}</p>
-            <input type="text" id="input${level.title.replace(/\s+/g, '')}" placeholder="${level.input}">
-            <button onclick="checkSolution('${level.title}', document.getElementById(`input${level.title.replace(/\s+/g, '')}`).value)">Check Solution</button>
+// Function to create and display the level containers
+function createLevelsContainer() {
+    const levelsContainer = document.getElementById('levels');
+    levelsContainer.innerHTML = levels.reduce((html, level) => {
+        html += `
+            <div class="level" data-level="${level.title}">
+                <h2 class="level-title">${level.title}</h2>
+                <p>${level.description}</p>
+                <input type="text" id="input${level.title.replace(/\s+/g, '')}" placeholder="${level.input}">
+                <button onclick="checkSolution('${level.title}', document.getElementById(`input${level.title.replace(/\s+/g, '')}`).value)">Check Solution</button>
+                <div class="hint">${level.hint}</div>
+            </div>
         `;
-        levelContent.appendChild(div);
-    });
+        return html;
+    }, '');
+}
+
+// Function to create and display the terminal output
+function createTerminalOutput() {
+    const terminalOutput = document.getElementById('terminal-output');
+    terminalOutput.innerHTML = `
+        <pre id="terminal-output-content"></pre>
+    `;
 }
 
 // Function to check the solution for a level
 function checkSolution(title, input) {
     const level = levels.find(l => l.title === title);
-    if (input === level.solution) {
-        alert(`${title} solved! The flag is ${level.solution}`);
-        document.getElementById('level-content').style.display = 'none';
+    if (input.trim() === level.solution.toLowerCase()) {
+        const container = document.querySelector(`.level[data-level="${title}"]`);
+        container.classList.add('completed');
+        container.style.animation = 'pulse 2s infinite';
+        const hint = document.querySelector(`.hint[data-level="${title}"]`);
+        hint.style.display = 'none';
+        const flag = document.querySelector(`.flag[data-level="${title}"]`);
+        flag.textContent = `FLAG{${level.title.replace(/\s+/g, '_').toUpperCase()}}`;
     } else {
         alert(`Incorrect solution for ${title}.`);
     }
 }
 
-// Initialize the levels
-createLevels();
+// Initialize the sidebar and levels container
+createSidebar();
+createLevelsContainer();
+createTerminalOutput();
+
+// Add event listeners to update progress bar
+document.querySelectorAll('.sidebar li').forEach(li => {
+    li.addEventListener('click', () => {
+        const level = document.querySelector(`.level[data-level="${li.dataset.level}"]`);
+        if (level.classList.contains('completed')) {
+            localStorage.setItem(`${li.dataset.level}_status`, 'completed');
+        } else {
+            localStorage.setItem(`${li.dataset.level}_status`, 'in_progress');
+        }
+    });
+});
+
+// Update progress bar
+function updateProgressBar() {
+    const levelsContainer = document.getElementById('levels');
+    const progressBar = document.createElement('div');
+    progressBar.className = 'progress-bar';
+    for (let i = 1; i <= 10; i++) {
+        const levelStatus = localStorage.getItem(`level_${i}_status`);
+        if (levelStatus === 'completed') {
+            progressBar.innerHTML += `
+                <div class="completed-level" style="--percentage: ${((i - 1) / 9) * 100}%"></div>
+            `;
+        }
+    }
+    levelsContainer.appendChild(progressBar);
+}
+
+// Initialize the progress bar
+updateProgressBar();
 </script>
 
 </body>
