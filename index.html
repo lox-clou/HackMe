@@ -1,305 +1,932 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Codeville CTF</title>
-    <!-- CSS -->
+    <title>HackMe | Interactive CTF Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent-cyan: #00f0ff;
+            --accent-green: #39ff14;
+            --accent-red: #ff0040;
+            --accent-yellow: #fbbf24;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --font-ui: 'Inter', sans-serif;
+            --font-code: 'JetBrains Mono', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
-            font-family: 'JetBrains Mono', monospace;
-            background-color: #0a0e1a;
-            color: #ffffff;
-            margin: 0;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-ui);
+            min-height: 100vh;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            overflow-x: hidden;
         }
-        .container {
-            text-align: left;
-            max-width: 80%;
-            background-color: #333;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
-        .level {
-            margin-top: 20px;
-            position: relative;
-        }
-        .level-title {
-            font-size: 1.5em;
-            color: #ff7347;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .level-content {
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #333;
-            color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .level-content p {
-            margin-bottom: 5px;
-        }
-        .level-content button {
-            background-color: #ff7347;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        .level-content .hint {
-            font-size: 1.2em;
-            color: #ff7347;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .level-content .flag {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #ff7347;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+
+        /* Sidebar */
         .sidebar {
             width: 280px;
-            background-color: #333;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--glass-border);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
             position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 10;
         }
-        .sidebar ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-            background-color: #282c32;
-            color: #ffffff;
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--font-code);
         }
-        .sidebar li {
-            padding: 10px;
+
+        .logo::before {
+            content: '>';
+            color: var(--accent-green);
+        }
+
+        .progress-container {
+            margin-bottom: 24px;
+        }
+
+        .progress-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .level-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .level-item {
+            padding: 12px 16px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: transform 0.3s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            font-size: 14px;
         }
-        .sidebar li:hover {
-            transform: translateY(-5px);
+
+        .level-item:hover {
+            background: var(--glass-bg);
+            border-color: var(--glass-border);
         }
-        .sidebar li.completed {
-            background-color: #4caf50;
-            color: #fff;
+
+        .level-item.active {
+            background: rgba(0, 240, 255, 0.1);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
         }
-        .level-container {
-            max-width: calc(100% - 280px);
-            padding-left: 300px;
+
+        .level-item.completed {
+            color: var(--accent-green);
         }
-        .code-block {
-            border: 1px solid #ddd;
-            padding: 15px;
+
+        .level-item.locked {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .level-num {
+            font-family: var(--font-code);
+            font-weight: 600;
+            width: 24px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 40px;
+            max-width: 900px;
+        }
+
+        .level-header {
+            margin-bottom: 32px;
+        }
+
+        .level-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .badge {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge.easy { background: rgba(57, 255, 20, 0.15); color: var(--accent-green); }
+        .badge.medium { background: rgba(251, 191, 36, 0.15); color: var(--accent-yellow); }
+        .badge.hard { background: rgba(255, 0, 64, 0.15); color: var(--accent-red); }
+        .badge.expert { background: rgba(0, 240, 255, 0.15); color: var(--accent-cyan); }
+
+        .level-desc {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
+
+        /* Glass Card */
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .terminal {
+            background: #000;
             border-radius: 8px;
-            background-color: #333;
-            color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 16px;
+            font-family: var(--font-code);
+            font-size: 14px;
+            color: var(--accent-green);
+            margin-top: 16px;
+            min-height: 100px;
+            white-space: pre-wrap;
+            border: 1px solid #333;
         }
-        .code-block pre {
-            margin: 0;
-            padding: 0;
-            font-family: 'JetBrains Mono', monospace;
-            background-color: #f8f9fa;
-            color: #333;
-            overflow-x: auto;
+
+        .terminal::before {
+            content: 'root@hackme:~$ ';
+            color: var(--accent-cyan);
         }
-        .terminal-output {
+
+        /* Inputs & Buttons */
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
             display: block;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        input[type="text"], input[type="password"], select {
             width: 100%;
-            margin-top: 20px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
             border-radius: 8px;
-            background-color: #333;
-            color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 12px 16px;
+            color: var(--text-primary);
+            font-family: var(--font-code);
+            font-size: 14px;
+            transition: all 0.2s;
         }
-        .terminal-output pre {
-            margin: 0;
-            padding: 0;
-            font-family: 'JetBrains Mono', monospace;
-            background-color: #f8f9fa;
-            color: #333;
-            overflow-x: auto;
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.1);
         }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--accent-cyan);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            background: #00d4e0;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .btn-danger {
+            background: rgba(255, 0, 64, 0.2);
+            color: var(--accent-red);
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        /* Hints & Solutions */
+        .hint-box, .solution-box {
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+            display: none;
+        }
+
+        .hint-box {
+            background: rgba(251, 191, 36, 0.1);
+            border-left: 3px solid var(--accent-yellow);
+            color: #fcd34d;
+        }
+
+        .solution-box {
+            background: rgba(57, 255, 20, 0.1);
+            border-left: 3px solid var(--accent-green);
+            color: #86efac;
+        }
+
+        .solution-box code {
+            background: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: var(--font-code);
+            color: var(--accent-cyan);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.1);
-            }
+            0%, 100% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(57, 255, 20, 0); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .animate-fade { animation: fadeIn 0.4s ease; }
+        .animate-success { animation: pulse 1s ease; border-color: var(--accent-green) !important; }
+        .animate-error { animation: shake 0.4s ease; border-color: var(--accent-red) !important; }
+
+        .flag-display {
+            font-family: var(--font-code);
+            background: rgba(57, 255, 20, 0.1);
+            color: var(--accent-green);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 16px;
+            display: none;
+            border: 1px dashed var(--accent-green);
+        }
+
+        .reset-btn {
+            margin-top: auto;
+            padding: 12px;
+            background: transparent;
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .reset-btn:hover {
+            background: rgba(255, 0, 64, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; height: auto; position: relative; }
+            .main-content { margin-left: 0; padding: 20px; }
+            body { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div id="sidebar"></div>
-    <div class="level-container" id="levels"></div>
-    <div id="terminal-output"></div>
-</div>
-
-<script>
-// Define the levels with their descriptions, vulnerable interfaces, flag input, hint system, and solution explanation
-const levels = [
-    {
-        title: 'SQL Injection Login (Easy)',
-        description: 'The login form is vulnerable to SQL injection. Try the payload `admin' OR '1'='1` to bypass authentication.',
-        input: 'username=guest&password=OR+1%3D1',
-        hint: 'Check the query parameters in the URL and see if there\'s a way to inject values.',
-        solution: 'The flag is displayed on the login page. The payload `admin' OR '1'='1` bypasses the authentication check.'
-    },
-    {
-        title: 'Reflected XSS (Easy)',
-        description: 'The search box renders user input as HTML, payload: <script>document.getElementById('flag').style.display='block'</script>',
-        input: 'username=<script>document.getElementById('flag').style.display='block'</script>',
-        hint: 'Check the query parameters in the URL and see if there\'s a way to inject values.',
-        solution: 'The flag is displayed on the login page. The payload `<script>document.getElementById('flag').style.display='block'</script>` triggers the alert.'
-    },
-    {
-        title: 'Command Injection (Medium)',
-        description: 'The ping tool is vulnerable to command injection. Try the IP `127.0.0.1 && cat flag.txt` to reveal the flag in the simulated output.',
-        input: 'ip=127.0.0.1;',
-        hint: 'Check the URL parameters and see if there\'s a way to inject values.',
-        solution: 'The flag is displayed on the login page. The payload `127.0.0.1 && cat flag.txt` reveals the flag.'
-    },
-    {
-        title: 'Directory Traversal (Medium)',
-        description: 'File viewer app with parameter ?file=report.txt. User changes to ?file=../../../flag.txt to read hidden file.',
-        input: '?file=../../../flag.txt',
-        hint: 'Check the query parameters in the URL and see if there\'s a way to navigate to other directories.',
-        solution: 'The flag is displayed on the user profile page. The payload `/user?id=2` navigates to the admin profile.'
-    },
-    {
-        title: 'Brute Force (Easy)',
-        description: 'Login with password list, 5 attempts shown, correct: password123',
-        input: 'username=guest&password=password123',
-        hint: 'Check the query parameters in the URL and see if there\'s a way to try different passwords.',
-        solution: 'The flag is displayed on the login page. The payload `username=guest&password=password123` counts attempts and reveals the flag.'
-    },
-    {
-        title: 'IDOR (Medium)',
-        description: 'User profile by ID, change id=1 to id=99 for admin',
-        input: '?id=2',
-        hint: 'Check the query parameters in the URL and see if there\'s a way to navigate to other profiles.',
-        solution: 'The flag is displayed on the user profile page. The payload `/user?id=1` navigates to the admin profile.'
-    },
-    {
-        title: 'CSRF (Hard)',
-        description: 'Bank transfer, craft hidden form that auto-submits',
-        input: '<form action="/transfer" method="post"><input type="hidden" name="to" value="attacker@localhost" /><input type="hidden" name="amount" value="10" /><button type="submit">Transfer</button></form>',
-        hint: 'Check the form and the URL parameters to see if there\'s a way to craft a form that auto-submits.',
-        solution: 'The flag is displayed on the user profile page. The payload crafts a form to transfer funds.'
-    },
-    {
-        title: 'File Upload Bypass (Hard)',
-        description: 'Upload .jpg with embedded PHP, rename to .php',
-        input: '<form action="/upload" method="post"><input type="file" name="image" /><button type="submit">Upload</button></form>',
-        hint: 'Check the file input element and the form submission to see if there\'s a way to upload files.',
-        solution: 'The flag is displayed on the uploaded image page. The payload uploads an image file and reveals the flag.'
-    },
-    {
-        title: 'JWT Manipulation (Expert)',
-        description: 'Decode/modify/encode JWT, change role to admin',
-        input: '<input type="hidden" name="token" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf3nrLWkWBsEd44uD03e8" />',
-        hint: 'Check the hidden input and the token encoding to see if there\'s a way to modify the token.',
-        solution: 'The flag is displayed on the admin panel. The payload changes the role from "user" to "admin".'
-    }
-];
-
-// Function to create and display the sidebar
-function createSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.innerHTML = `
-        <ul>
-            ${levels.map(level => `<li data-level="${level.title}">${level.title}</li>`).join('')}
-        </ul>
-    `;
-}
-
-// Function to create and display the level containers
-function createLevelsContainer() {
-    const levelsContainer = document.getElementById('levels');
-    levelsContainer.innerHTML = levels.reduce((html, level) => {
-        html += `
-            <div class="level" data-level="${level.title}">
-                <h2 class="level-title">${level.title}</h2>
-                <p>${level.description}</p>
-                <input type="text" id="input${level.title.replace(/\s+/g, '')}" placeholder="${level.input}">
-                <button onclick="checkSolution('${level.title}', document.getElementById(`input${level.title.replace(/\s+/g, '')}`).value)">Check Solution</button>
-                <div class="hint">${level.hint}</div>
+    <aside class="sidebar">
+        <div class="logo">HackMe_CTF</div>
+        
+        <div class="progress-container">
+            <div class="progress-label">
+                <span>Прогресс</span>
+                <span id="progress-text">0/10</span>
             </div>
-        `;
-        return html;
-    }, '');
-}
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
 
-// Function to create and display the terminal output
-function createTerminalOutput() {
-    const terminalOutput = document.getElementById('terminal-output');
-    terminalOutput.innerHTML = `
-        <pre id="terminal-output-content"></pre>
-    `;
-}
+        <ul class="level-list" id="level-list">
+            <!-- Generated by JS -->
+        </ul>
 
-// Function to check the solution for a level
-function checkSolution(title, input) {
-    const level = levels.find(l => l.title === title);
-    if (input.trim() === level.solution.toLowerCase()) {
-        const container = document.querySelector(`.level[data-level="${title}"]`);
-        container.classList.add('completed');
-        container.style.animation = 'pulse 2s infinite';
-        const hint = document.querySelector(`.hint[data-level="${title}"]`);
-        hint.style.display = 'none';
-        const flag = document.querySelector(`.flag[data-level="${title}"]`);
-        flag.textContent = `FLAG{${level.title.replace(/\s+/g, '_').toUpperCase()}}`;
-    } else {
-        alert(`Incorrect solution for ${title}.`);
-    }
-}
+        <button class="reset-btn" onclick="resetProgress()">Сбросить прогресс</button>
+    </aside>
 
-// Initialize the sidebar and levels container
-createSidebar();
-createLevelsContainer();
-createTerminalOutput();
+    <main class="main-content" id="main-content">
+        <!-- Level content injected here -->
+    </main>
 
-// Add event listeners to update progress bar
-document.querySelectorAll('.sidebar li').forEach(li => {
-    li.addEventListener('click', () => {
-        const level = document.querySelector(`.level[data-level="${li.dataset.level}"]`);
-        if (level.classList.contains('completed')) {
-            localStorage.setItem(`${li.dataset.level}_status`, 'completed');
-        } else {
-            localStorage.setItem(`${li.dataset.level}_status`, 'in_progress');
+    <script>
+        // --- DATA ---
+        const levels = [
+            {
+                id: 1,
+                title: "SQL Injection",
+                difficulty: "easy",
+                desc: "Обойдите форму входа, используя классическую SQL-инъекцию. Цель: войти как администратор без знания пароля.",
+                html: `
+                    <div class="input-group">
+                        <label>Username</label>
+                        <input type="text" id="sqli-user" placeholder="admin">
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" id="sqli-pass" placeholder="••••••">
+                    </div>
+                    <button class="btn btn-primary" onclick="checkLevel1()">Войти</button>
+                    <div class="terminal" id="sqli-term">Ожидание ввода...</div>
+                `,
+                check: () => {
+                    const user = document.getElementById('sqli-user').value;
+                    if (user.includes("' OR '1'='1") || user.includes("admin'--") || user.includes("' OR 1=1--")) {
+                        return true;
+                    }
+                    return false;
+                },
+                hints: [
+                    "Попробуйте ввести что-то, что всегда будет истинным в условии WHERE.",
+                    "Классический пейлоад начинается с одинарной кавычки: ' OR ...",
+                    "Попробуйте: admin' OR '1'='1"
+                ],
+                solution: "Введите <code>admin' OR '1'='1</code> в поле Username. Это закрывает строку и добавляет условие, которое всегда истинно, обходя проверку пароля."
+            },
+            {
+                id: 2,
+                title: "Reflected XSS",
+                difficulty: "easy",
+                desc: "Поле поиска отражает ваш запрос на странице. Внедрите JavaScript, чтобы вызвать alert() и получить флаг.",
+                html: `
+                    <div class="input-group">
+                        <label>Поиск по сайту</label>
+                        <input type="text" id="xss-input" placeholder="Введите запрос...">
+                    </div>
+                    <button class="btn btn-primary" onclick="checkLevel2()">Найти</button>
+                    <div class="terminal" id="xss-term">Результат поиска появится здесь...</div>
+                `,
+                check: () => {
+                    const val = document.getElementById('xss-input').value;
+                    if (val.toLowerCase().includes('<script>') && val.toLowerCase().includes('alert')) {
+                        return true;
+                    }
+                    return false;
+                },
+                hints: [
+                    "Вам нужно закрыть контекст HTML и открыть тег script.",
+                    "Попробуйте использовать <script>alert(1)</script>",
+                    "Система ищет именно тег <script> с функцией alert внутри."
+                ],
+                solution: "Введите <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code>. Браузер выполнит код, и симуляция покажет успешную эксплуатацию."
+            },
+            {
+                id: 3,
+                title: "Command Injection",
+                difficulty: "medium",
+                desc: "Утилита ping уязвима к внедрению команд. Выполните команду чтения файла flag.txt после IP-адреса.",
+                html: `
+                    <div class="input-group">
+                        <label>Целевой IP</label>
+                        <input type="text" id="cmd-input" placeholder="127.0.0.1">
+                    </div>
+                    <button class="btn btn-primary" onclick="checkLevel3()">Ping</button>
+                    <div class="terminal" id="cmd-term">root@hackme:~$ </div>
+                `,
+                check: () => {
+                    const val = document.getElementById('cmd-input').value;
+                    if ((val.includes(';') || val.includes('&&') || val.includes('|')) && val.includes('cat') && val.includes('flag')) {
+                        return true;
+                    }
+                    return false;
+                },
+                hints: [
+                    "Используйте разделитель команд: ; или &&",
+                    "После разделителя выполните команду чтения файла.",
+                    "Попробуйте: 127.0.0.1; cat flag.txt"
+                ],
+                solution: "Введите <code>127.0.0.1; cat flag.txt</code>. Разделитель ; завершает команду ping и начинает новую команду чтения файла."
+            },
+            {
+                id: 4,
+                title: "Directory Traversal",
+                difficulty: "medium",
+                desc: "Веб-приложение позволяет читать файлы. Получите доступ к файлу флага за пределами корневой директории.",
+                html: `
+                    <div class="input-group">
+                        <label>Имя файла</label>
+                        <input type="text" id="dir-input" value="report.txt">
+                    </div>
+                    <button class="btn btn-primary" onclick="checkLevel4()">Прочитать</button>
+                    <div class="terminal" id="dir-term">Содержимое файла...</div>
+                `,
+                check: () => {
+                    const val = document.getElementById('dir-input').value;
+                    if (val.includes('../') && val.includes('flag')) {
+                        return true;
+                    }
+                    return false;
+                },
+                hints: [
+                    "Используйте последовательность ../ для выхода из текущей директории.",
+                    "Вам нужно подняться на несколько уровней вверх.",
+                    "Попробуйте: ../../../../flag.txt"
+                ],
+                solution: "Введите <code>../../../../flag.txt</code>. Последовательность ../ заставляет сервер выйти из ограниченной директории."
+            },
+            {
+                id: 5,
+                title: "Brute Force",
+                difficulty: "easy",
+                desc: "У вас есть только 5 попыток подобрать пароль к аккаунту. Подсказка: это очень распространённый пароль.",
+                html: `
+                    <div class="input-group">
+                        <label>Пароль (Попыток осталось: <span id="attempts">5</span>)</label>
+                        <input type="password" id="bf-input" placeholder="••••••">
+                    </div>
+                    <button class="btn btn-primary" onclick="checkLevel5()">Войти</button>
+                    <div class="terminal" id="bf-term">Ожидание...</div>
+                `,
+                check: () => {
+                    const val = document.getElementById('bf-input').value;
+                    let attempts = parseInt(localStorage.getItem('bf_attempts') || 5);
+                    if (val === 'password123') {
+                        return true;
+                    } else {
+                        attempts--;
+                        localStorage.setItem('bf_attempts', attempts);
+                        document.getElementById('attempts').innerText = attempts;
+                        document.getElementById('bf-term').innerText = `Неверный пароль. Осталось попыток: ${attempts}`;
+                        document.getElementById('bf-term').classList.add('animate-error');
+                        setTimeout(() => document.getElementById('bf-term').classList.remove('animate-error'), 400);
+                        if (attempts <= 0) {
+                            document.getElementById('bf-term').innerText = "Аккаунт заблокирован. Обновите страницу для сброса (но флаг не получить).";
+                        }
+                        return false;
+                    }
+                },
+                hints: [
+                    "Подумайте о самых простых и распространённых паролях.",
+                    "Часто это комбинация слова и цифр.",
+                    "Попробуйте: password123"
+                ],
+                solution: "Введите <code>password123</code>. Это один из самых частых паролей в словарях для брутфорса."
+            },
+            {
+                id: 6,
+                title: "IDOR",
+                difficulty: "medium",
+                desc: "Просмотр профиля пользователя по ID. Найдите способ получить доступ к профилю администратора.",
+                html: `
+                    <div class="input-group">
+                        <label>User ID</label>
+                        <select id="idor-input">
+                            <option value="1">User 1 (Вы)</option>
+                            <option value="2">User 2</option>
+                            <option value="3">User 3</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="checkLevel6()">Загрузить профиль</button>
+                    <div class="terminal" id="idor-term">Данные профиля...</div>
+                `,
+                check: () => {
+                    const val = document.getElementById('idor-input').value;
+                    if (val === '2' || val === 'admin' || val === '99') {
+                        return true;
+                    }
+                    return false;
+                },
+                hints: [
+                    "ID администратора часто равен 1 или 2.",
+                    "Попробуйте выбрать User 2 из выпадающего списка (или измените значение через DevTools).",
+                    "Система проверяет, равен ли ID 2 или admin."
+                ],
+                solution: "Выберите <code>User 2</code> (или введите 2/99 через консоль). Приложение не проверяет авторизацию, позволяя читать чужие данные."
+            },
+            {
+                id: 7,
+                title: "CSRF",
+                difficulty: "hard",
+                desc: "Симуляция уязвимого банка. Нажмите кнопку ниже, чтобы увидеть, как работает подделка межсайтовых запросов.",
+                html: `
+                    <div class="glass-card" style="text-align: center; padding: 40px;">
+                        <h3 style="margin-bottom: 16px; color: var(--accent-red);">⚠️ Подтверждение перевода</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 24px;">Вы собираетесь перевести $1000 на счет атакующего.</p>
+                        <button class="btn btn-danger" onclick="checkLevel7()" style="font-size: 16px; padding: 16px 32px;">Подтвердить перевод</button>
+                    </div>
+                    <div class="terminal" id="csrf-term">Ожидание действия...</div>
+                `,
+                check: () => {
+                    return true; // Сам факт нажатия кнопки симулирует успешный CSRF
+                },
+                hints: [
+                    "В реальном сценарии эта форма отправилась бы автоматически при посещении вредоносного сайта.",
+                    "Нажмите кнопку, чтобы симулировать выполнение вредоносного запроса.",
+                    "CSRF использует аутентификацию жертвы в её браузере."
+                ],
+                solution: "Нажатие кнопки симулирует отправку поддельного запроса. Защита: использование CSRF-токенов и SameSite cookie."
+            },
+            {
+                id: 8,
+                title: "File Upload Bypass",
+                difficulty: "hard",
+                desc: "Загрузчик файлов принимает только изображения. Обойдите проверку и загрузите исполняемый скрипт.",
+                html: `
+                    <div class="input-group">
+                        <label>Выберите файл</label>
+                        <input type="file" id="upload-input" accept=".jpg,.png,.gif">
+                    </div>
+                    <button class="btn btn-primary" onclick="checkLevel8()">Загрузить</button>
+                    <div class="terminal" id="upload-term">Статус загрузки...</div>
+                `,
+                check: () => {
+                    const fileInput = document.getElementById('upload-input');
+                    if (fileInput.files.length > 0) {
+                        const name = fileInput.files[0].name.toLowerCase();
+                        if (name.endsWith('.php') || name.endsWith('.sh') || name.endsWith('.exe') || name.includes('.php.')) {
+                            return true;
+                        }
+                    }
+                    return false;
+                },
+                hints: [
+                    "Создайте текстовый файл и переименуйте его в shell.php",
+                    "Некоторые системы проверяют только первое расширение.",
+                    "Попробуйте загрузить файл с именем shell.php или image.php.jpg"
+                ],
+                solution: "Загрузите файл с расширением <code>.php</code> или <code>.sh</code>. Слабая проверка на стороне клиента легко обходится."
+            },
+            {
+                id: 9,
+                title: "JWT Manipulation",
+                difficulty: "expert",
+                desc: "У вас есть токен обычного пользователя. Измените его, чтобы получить роль администратора.",
+                html: `
+                    <div class="input-group">
+                        <label>Ваш текущий JWT (role: user)</label>
+                        <input type="text" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoidXNlciJ9.fake" readonly style="opacity: 0.6;">
+                    </div>
+                    <div class="input-group">
+                        <label>Модифицированный JWT (role: admin)</label>
+                        <input type="text" id="jwt-input" placeholder="Введите подделанный токен...">
+                    </div>
+                    <button class="btn btn-primary" onclick="checkLevel9()">Проверить токен</button>
+                    <div class="terminal" id="jwt-term">Проверка подписи...</div>
+                `,
+                check: () => {
+                    const val = document.getElementById('jwt-input').value;
+                    // Проверяем, содержит ли токен admin в payload (упрощённо)
+                    try {
+                        const parts = val.split('.');
+                        if (parts.length >= 2) {
+                            const payload = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
+                            if (payload.includes('"role":"admin"') || payload.includes('"role": "admin"')) {
+                                return true;
+                            }
+                        }
+                    } catch(e) {}
+                    return false;
+                },
+                hints: [
+                    "JWT состоит из 3 частей, разделённых точкой. Вторая часть — это Base64 закодированный JSON.",
+                    "Декодируйте вторую часть, измените 'user' на 'admin', закодируйте обратно в Base64.",
+                    "Попробуйте ввести токен, где вторая часть декодируется в {\"role\":\"admin\"}"
+                ],
+                solution: "Введите токен, где payload содержит <code>\"role\":\"admin\"</code>. Например: <code>eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiYWRtaW4ifQ.fake</code>. Сервер не проверяет подпись."
+            },
+            {
+                id: 10,
+                title: "SSRF",
+                difficulty: "expert",
+                desc: "Утилита для загрузки содержимого URL. Заставьте сервер сделать запрос к внутреннему ресурсу.",
+                html: `
+                    <div class="input-group">
+                        <label>URL для загрузки</label>
+                        <input type="text" id="ssrf-input" placeholder="https://example.com">
+                    </div>
+                    <button class="btn btn-primary" onclick="checkLevel10()">Загрузить</button>
+                    <div class="terminal" id="ssrf-term">Ожидание URL...</div>
+                `,
+                check: () => {
+                    const val = document.getElementById('ssrf-input').value.toLowerCase();
+                    if (val.includes('localhost') || val.includes('127.0.0.1') || val.includes('internal') || val.includes('0.0.0.0')) {
+                        return true;
+                    }
+                    return false;
+                },
+                hints: [
+                    "Внутренние сервисы часто доступны через localhost или 127.0.0.1",
+                    "Попробуйте запросить http://localhost/admin или http://127.0.0.1/flag",
+                    "SSRF позволяет обходить внешние фаерволы, используя доверие сервера к самому себе."
+                ],
+                solution: "Введите <code>http://localhost/admin</code> или <code>http://127.0.0.1/flag</code>. Сервер выполнит запрос от своего имени и вернёт внутренние данные."
+            }
+        ];
+
+        // --- STATE ---
+        let currentLevel = 1;
+        let completedLevels = JSON.parse(localStorage.getItem('hackme_completed') || '[]');
+
+        // --- INIT ---
+        function init() {
+            renderSidebar();
+            loadLevel(currentLevel);
+            updateProgress();
         }
-    });
-});
 
-// Update progress bar
-function updateProgressBar() {
-    const levelsContainer = document.getElementById('levels');
-    const progressBar = document.createElement('div');
-    progressBar.className = 'progress-bar';
-    for (let i = 1; i <= 10; i++) {
-        const levelStatus = localStorage.getItem(`level_${i}_status`);
-        if (levelStatus === 'completed') {
-            progressBar.innerHTML += `
-                <div class="completed-level" style="--percentage: ${((i - 1) / 9) * 100}%"></div>
+        function renderSidebar() {
+            const list = document.getElementById('level-list');
+            list.innerHTML = '';
+            
+            levels.forEach(level => {
+                const li = document.createElement('li');
+                li.className = 'level-item';
+                if (level.id === currentLevel) li.classList.add('active');
+                if (completedLevels.includes(level.id)) li.classList.add('completed');
+                if (level.id > Math.max(...completedLevels, 0) + 1 && !completedLevels.includes(level.id)) {
+                    li.classList.add('locked');
+                }
+                
+                li.innerHTML = `
+                    <span class="level-num">${String(level.id).padStart(2, '0')}</span>
+                    <span>${level.title}</span>
+                `;
+                
+                if (!li.classList.contains('locked')) {
+                    li.onclick = () => {
+                        currentLevel = level.id;
+                        renderSidebar();
+                        loadLevel(currentLevel);
+                    };
+                }
+                list.appendChild(li);
+            });
+        }
+
+        function loadLevel(id) {
+            const level = levels.find(l => l.id === id);
+            const main = document.getElementById('main-content');
+            
+            let hintsHtml = level.hints.map((h, i) => 
+                `<div class="hint-box" id="hint-${i+1}" style="display:none; margin-top:8px;">💡 Подсказка ${i+1}: ${h}</div>`
+            ).join('');
+
+            main.innerHTML = `
+                <div class="level-header animate-fade">
+                    <div class="level-title">
+                        ${level.title}
+                        <span class="badge ${level.difficulty}">${level.difficulty}</span>
+                    </div>
+                    <p class="level-desc">${level.desc}</p>
+                </div>
+
+                <div class="glass-card animate-fade">
+                    ${level.html}
+                    <div class="flag-display" id="flag-display">FLAG{...}</div>
+                </div>
+
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="showHint()">Показать подсказку</button>
+                    <button class="btn btn-secondary" onclick="toggleSolution()">Показать решение</button>
+                </div>
+
+                <div class="hint-box" id="hints-container" style="display:none;">
+                    ${hintsHtml}
+                </div>
+
+                <div class="solution-box" id="solution-box" style="display:none;">
+                    <strong>Решение:</strong> ${level.solution}
+                </div>
             `;
+            
+            window.currentHint = 0;
         }
-    }
-    levelsContainer.appendChild(progressBar);
-}
 
-// Initialize the progress bar
-updateProgressBar();
-</script>
+        // --- LOGIC ---
+        function showHint() {
+            const container = document.getElementById('hints-container');
+            container.style.display = 'block';
+            if (window.currentHint < 3) {
+                window.currentHint++;
+                document.getElementById(`hint-${window.currentHint}`).style.display = 'block';
+            }
+        }
 
+        function toggleSolution() {
+            const box = document.getElementById('solution-box');
+            box.style.display = box.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function showSuccess(level) {
+            const flagBox = document.getElementById('flag-display');
+            flagBox.innerText = `FLAG{${level.title.replace(/\s+/g, '_').toLowerCase()}_master}`;
+            flagBox.style.display = 'block';
+            
+            const card = document.querySelector('.glass-card');
+            card.classList.add('animate-success');
+            
+            if (!completedLevels.includes(level.id)) {
+                completedLevels.push(level.id);
+                localStorage.setItem('hackme_completed', JSON.stringify(completedLevels));
+                updateProgress();
+                renderSidebar();
+            }
+        }
+
+        function showError() {
+            const card = document.querySelector('.glass-card');
+            card.classList.add('animate-error');
+            setTimeout(() => card.classList.remove('animate-error'), 400);
+        }
+
+        function updateProgress() {
+            const pct = (completedLevels.length / levels.length) * 100;
+            document.getElementById('progress-fill').style.width = pct + '%';
+            document.getElementById('progress-text').innerText = `${completedLevels.length}/${levels.length}`;
+        }
+
+        function resetProgress() {
+            if (confirm('Сбросить весь прогресс?')) {
+                localStorage.removeItem('hackme_completed');
+                localStorage.removeItem('bf_attempts');
+                completedLevels = [];
+                currentLevel = 1;
+                init();
+            }
+        }
+
+        // --- LEVEL CHECKERS ---
+        function checkLevel1() {
+            if (levels[0].check()) {
+                document.getElementById('sqli-term').innerText = "Доступ разрешён. Добро пожаловать, admin.\n\nFLAG{sql_master_2024}";
+                showSuccess(levels[0]);
+            } else {
+                document.getElementById('sqli-term').innerText = "Ошибка входа: Неверный логин или пароль.";
+                showError();
+            }
+        }
+
+        function checkLevel2() {
+            if (levels[1].check()) {
+                document.getElementById('xss-term').innerHTML = "<span style='color:#ff0040'>[ALERT TRIGGERED]</span><br>Успешное выполнение XSS!<br>FLAG{xss_reflected_win}";
+                showSuccess(levels[1]);
+            } else {
+                document.getElementById('xss-term').innerText = `Результат поиска: ${document.getElementById('xss-input').value}`;
+                showError();
+            }
+        }
+
+        function checkLevel3() {
+            if (levels[2].check()) {
+                document.getElementById('cmd-term').innerText = "PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.\n64 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.032 ms\n\n--- ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss\n\nroot@hackme:~$ cat flag.txt\nFLAG{cmd_injection_pro}";
+                showSuccess(levels[2]);
+            } else {
+                document.getElementById('cmd-term').innerText = `PING ${document.getElementById('cmd-input').value}: Name or service not known`;
+                showError();
+            }
+        }
+
+        function checkLevel4() {
+            if (levels[3].check()) {
+                document.getElementById('dir-term').innerText = "=== Содержимое /etc/flag.txt ===\n\nFLAG{dir_traversal_king}\n\n===============================";
+                showSuccess(levels[3]);
+            } else {
+                document.getElementById('dir-term').innerText = `Чтение файла: ${document.getElementById('dir-input').value}\n[ERROR] Файл не найден или доступ запрещён.`;
+                showError();
+            }
+        }
+
+        function checkLevel5() {
+            if (levels[4].check()) {
+                document.getElementById('bf-term').innerText = "Доступ разрешён.\n\nFLAG{brute_force_success}";
+                showSuccess(levels[4]);
+            } else {
+                // Логика ошибок уже внутри check()
+            }
+        }
+
+        function checkLevel6() {
+            if (levels[5].check()) {
+                document.getElementById('idor-term').innerText = "=== ПРОФИЛЬ АДМИНИСТРАТОРА ===\nUser: admin\nRole: superuser\nSecret: FLAG{idor_admin_access}\n==============================";
+                showSuccess(levels[5]);
+            } else {
+                document.getElementById('idor-term').innerText = "=== ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ ===\nUser: guest\nRole: user\nBio: Обычный пользователь.\n==============================";
+                showError();
+            }
+        }
+
+        function checkLevel7() {
+            if (levels[6].check()) {
+                document.getElementById('csrf-term').innerText = "[SUCCESS] Перевод $1000 выполнен на счет атакующего.\nАутентификация жертвы использована автоматически.\n\nFLAG{csrf_token_stolen}";
+                showSuccess(levels[6]);
+            }
+        }
+
+        function checkLevel8() {
+            if (levels[7].check()) {
+                document.getElementById('upload-term').innerText = "[WARNING] Обход проверки расширения!\nФайл загружен и исполнен.\n\nFLAG{upload_bypass_shell}";
+                showSuccess(levels[7]);
+            } else {
+                document.getElementById('upload-term').innerText = "[ERROR] Разрешены только файлы .jpg, .png, .gif";
+                showError();
+            }
+        }
+
+        function checkLevel9() {
+            if (levels[8].check()) {
+                document.getElementById('jwt-term').innerText = "[SUCCESS] Токен принят.\nРоль изменена на: admin\nДоступ к панели управления получен.\n\nFLAG{jwt_admin_takeover}";
+                showSuccess(levels[8]);
+            } else {
+                document.getElementById('jwt-term').innerText = "[ERROR] Неверная подпись или роль не 'admin'.";
+                showError();
+            }
+        }
+
+        function checkLevel10() {
+            if (levels[9].check()) {
+                document.getElementById('ssrf-term').innerText = "HTTP/1.1 200 OK\nServer: Internal-Admin-Panel/1.0\nContent-Type: text/plain\n\nFLAG{ssrf_internal_network}";
+                showSuccess(levels[9]);
+            } else {
+                document.getElementById('ssrf-term').innerText = "[ERROR] Внешние URL запрещены политикой безопасности или ресурс не найден.";
+                showError();
+            }
+        }
+
+        // Start
+        init();
+    </script>
 </body>
 </html>
