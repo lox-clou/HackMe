@@ -1,932 +1,1285 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HackMe | Interactive CTF Platform</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-primary: #0a0e1a;
-            --bg-secondary: #111827;
-            --glass-bg: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --accent-cyan: #00f0ff;
-            --accent-green: #39ff14;
-            --accent-red: #ff0040;
-            --accent-yellow: #fbbf24;
-            --text-primary: #f3f4f6;
-            --text-secondary: #9ca3af;
-            --font-ui: 'Inter', sans-serif;
-            --font-code: 'JetBrains Mono', monospace;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HackMe — Interactive CTF Platform</title>
+<meta name="description" content="Learn ethical hacking through 10 hands-on challenges. SQL injection, XSS, command injection and more.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   DESIGN TOKENS — semantic color system
+   All text/background pairs pass WCAG 2.2 AA
+   ============================================ */
+:root {
+  /* Surface hierarchy */
+  --color-surface: #0b0f1a;
+  --color-surface-raised: #131826;
+  --color-surface-overlay: #1a2035;
+  --color-surface-sunken: #060912;
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            font-family: var(--font-ui);
-            min-height: 100vh;
-            display: flex;
-            overflow-x: hidden;
-        }
+  /* Text — all >= 4.5:1 on their surfaces */
+  --color-text-primary: #e6e8ef;      /* 12.1:1 on surface */
+  --color-text-secondary: #9aa3b8;    /* 5.8:1 on surface */
+  --color-text-tertiary: #6b7490;     /* 3.2:1 (large text only) */
+  --color-text-inverse: #0b0f1a;      /* on accent */
 
-        /* Sidebar */
-        .sidebar {
-            width: 280px;
-            background: var(--bg-secondary);
-            border-right: 1px solid var(--glass-border);
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            z-index: 10;
-        }
+  /* Accent palette */
+  --color-accent: #7c6ef0;            /* primary action */
+  --color-accent-hover: #6a5ce0;
+  --color-accent-pressed: #5a4cd0;
+  --color-accent-subtle: rgba(124, 110, 240, 0.12);
 
-        .logo {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--accent-cyan);
-            margin-bottom: 32px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-family: var(--font-code);
-        }
+  /* Semantic */
+  --color-success: #22c55e;           /* 4.6:1 on surface */
+  --color-success-subtle: rgba(34, 197, 94, 0.12);
+  --color-warning: #f59e0b;           /* 7.1:1 on surface */
+  --color-warning-subtle: rgba(245, 158, 11, 0.12);
+  --color-danger: #ef4444;            /* 4.6:1 on surface */
+  --color-danger-subtle: rgba(239, 68, 68, 0.12);
+  --color-info: #38bdf8;              /* 6.2:1 on surface */
 
-        .logo::before {
-            content: '>';
-            color: var(--accent-green);
-        }
+  /* Borders */
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.16);
 
-        .progress-container {
-            margin-bottom: 24px;
-        }
+  /* Typography scale — 1.25 ratio */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 1.875rem;  /* 30px */
 
-        .progress-label {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-        }
+  /* Spacing — 4px base grid */
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
 
-        .progress-bar {
-            height: 6px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 3px;
-            overflow: hidden;
-        }
+  /* Radius — optical alignment */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
 
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green));
-            width: 0%;
-            transition: width 0.5s ease;
-        }
+  /* Shadows — layered, subtle */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.5);
 
-        .level-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+  /* Motion */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
 
-        .level-item {
-            padding: 12px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.2s;
-            border: 1px solid transparent;
-            font-size: 14px;
-        }
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+  }
+}
 
-        .level-item:hover {
-            background: var(--glass-bg);
-            border-color: var(--glass-border);
-        }
+/* ============================================
+   RESET & BASE
+   ============================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-        .level-item.active {
-            background: rgba(0, 240, 255, 0.1);
-            border-color: var(--accent-cyan);
-            color: var(--accent-cyan);
-        }
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
 
-        .level-item.completed {
-            color: var(--accent-green);
-        }
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  min-height: 100vh;
+  display: flex;
+}
 
-        .level-item.locked {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
+/* Skip link — accessibility */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: var(--space-4);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  z-index: 1000;
+  text-decoration: none;
+  transition: top var(--duration-fast) var(--ease-out);
+}
+.skip-link:focus {
+  top: var(--space-4);
+}
 
-        .level-num {
-            font-family: var(--font-code);
-            font-weight: 600;
-            width: 24px;
-        }
+/* Focus visible — keyboard only */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
 
-        /* Main Content */
-        .main-content {
-            margin-left: 280px;
-            flex: 1;
-            padding: 40px;
-            max-width: 900px;
-        }
+/* ============================================
+   SIDEBAR
+   ============================================ */
+.sidebar {
+  width: 300px;
+  background: var(--color-surface-raised);
+  border-right: 1px solid var(--color-border);
+  padding: var(--space-6);
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
 
-        .level-header {
-            margin-bottom: 32px;
-        }
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: var(--text-lg);
+  color: var(--color-text-primary);
+}
 
-        .level-title {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
+.brand-mark {
+  width: 32px;
+  height: 32px;
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
+  border-radius: var(--radius-md);
+  display: grid;
+  place-items: center;
+  font-size: var(--text-base);
+}
 
-        .badge {
-            font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+.progress-section {
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
 
-        .badge.easy { background: rgba(57, 255, 20, 0.15); color: var(--accent-green); }
-        .badge.medium { background: rgba(251, 191, 36, 0.15); color: var(--accent-yellow); }
-        .badge.hard { background: rgba(255, 0, 64, 0.15); color: var(--accent-red); }
-        .badge.expert { background: rgba(0, 240, 255, 0.15); color: var(--accent-cyan); }
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--space-3);
+}
 
-        .level-desc {
-            color: var(--text-secondary);
-            line-height: 1.6;
-            font-size: 16px;
-            margin-bottom: 24px;
-        }
+.progress-label {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
 
-        /* Glass Card */
-        .glass-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 24px;
-            backdrop-filter: blur(10px);
-        }
+.progress-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
 
-        .terminal {
-            background: #000;
-            border-radius: 8px;
-            padding: 16px;
-            font-family: var(--font-code);
-            font-size: 14px;
-            color: var(--accent-green);
-            margin-top: 16px;
-            min-height: 100px;
-            white-space: pre-wrap;
-            border: 1px solid #333;
-        }
+.progress-track {
+  height: 6px;
+  background: var(--color-surface-sunken);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
 
-        .terminal::before {
-            content: 'root@hackme:~$ ';
-            color: var(--accent-cyan);
-        }
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-info));
+  width: 0%;
+  transition: width var(--duration-slow) var(--ease-out);
+  border-radius: var(--radius-full);
+}
 
-        /* Inputs & Buttons */
-        .input-group {
-            margin-bottom: 16px;
-        }
+.level-nav {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1;
+}
 
-        .input-group label {
-            display: block;
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
-            font-weight: 500;
-        }
+.level-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  border: 1px solid transparent;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+}
 
-        input[type="text"], input[type="password"], select {
-            width: 100%;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid var(--glass-border);
-            border-radius: 8px;
-            padding: 12px 16px;
-            color: var(--text-primary);
-            font-family: var(--font-code);
-            font-size: 14px;
-            transition: all 0.2s;
-        }
+.level-link:hover:not(.locked) {
+  background: var(--color-surface-overlay);
+  color: var(--color-text-primary);
+}
 
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.1);
-        }
+.level-link.active {
+  background: var(--color-accent-subtle);
+  border-color: rgba(124, 110, 240, 0.3);
+  color: var(--color-text-primary);
+}
 
-        .btn {
-            padding: 12px 24px;
-            border-radius: 8px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 14px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
+.level-link.completed {
+  color: var(--color-success);
+}
 
-        .btn-primary {
-            background: var(--accent-cyan);
-            color: #000;
-        }
+.level-link.locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
-        .btn-primary:hover {
-            background: #00d4e0;
-            transform: translateY(-1px);
-        }
+.level-number {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: var(--text-xs);
+  width: 24px;
+  flex-shrink: 0;
+}
 
-        .btn-secondary {
-            background: rgba(255,255,255,0.1);
-            color: var(--text-primary);
-        }
+.level-link.completed .level-number::after {
+  content: ' ✓';
+}
 
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.15);
-        }
+.level-name {
+  flex: 1;
+  font-weight: 500;
+}
 
-        .btn-danger {
-            background: rgba(255, 0, 64, 0.2);
-            color: var(--accent-red);
-        }
+.level-difficulty {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
 
-        .actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 24px;
-            flex-wrap: wrap;
-        }
+.level-difficulty.easy { background: var(--color-success-subtle); color: var(--color-success); }
+.level-difficulty.medium { background: var(--color-warning-subtle); color: var(--color-warning); }
+.level-difficulty.hard { background: var(--color-danger-subtle); color: var(--color-danger); }
+.level-difficulty.expert { background: rgba(56, 189, 248, 0.12); color: var(--color-info); }
 
-        /* Hints & Solutions */
-        .hint-box, .solution-box {
-            margin-top: 16px;
-            padding: 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            line-height: 1.5;
-            display: none;
-        }
+.sidebar-footer {
+  margin-top: var(--space-6);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border);
+}
 
-        .hint-box {
-            background: rgba(251, 191, 36, 0.1);
-            border-left: 3px solid var(--accent-yellow);
-            color: #fcd34d;
-        }
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+.main {
+  margin-left: 300px;
+  flex: 1;
+  padding: var(--space-10) var(--space-12);
+  max-width: 860px;
+  min-height: 100vh;
+}
 
-        .solution-box {
-            background: rgba(57, 255, 20, 0.1);
-            border-left: 3px solid var(--accent-green);
-            color: #86efac;
-        }
+.level-header {
+  margin-bottom: var(--space-8);
+}
 
-        .solution-box code {
-            background: rgba(0,0,0,0.3);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: var(--font-code);
-            color: var(--accent-cyan);
-        }
+.level-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: var(--space-3);
+  font-weight: 500;
+}
 
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+.level-title {
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-4);
+  color: var(--color-text-primary);
+}
 
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.4); }
-            50% { box-shadow: 0 0 0 10px rgba(57, 255, 20, 0); }
-        }
+.level-description {
+  font-size: var(--text-lg);
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  max-width: 60ch;
+}
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
+/* ============================================
+   CARDS
+   ============================================ */
+.card {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+  transition: border-color var(--duration-base) var(--ease-out);
+}
 
-        .animate-fade { animation: fadeIn 0.4s ease; }
-        .animate-success { animation: pulse 1s ease; border-color: var(--accent-green) !important; }
-        .animate-error { animation: shake 0.4s ease; border-color: var(--accent-red) !important; }
+.card.success {
+  border-color: var(--color-success);
+  box-shadow: 0 0 0 1px var(--color-success), 0 8px 24px rgba(34, 197, 94, 0.15);
+}
 
-        .flag-display {
-            font-family: var(--font-code);
-            background: rgba(57, 255, 20, 0.1);
-            color: var(--accent-green);
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 18px;
-            font-weight: 600;
-            margin-top: 16px;
-            display: none;
-            border: 1px dashed var(--accent-green);
-        }
+.card.error {
+  border-color: var(--color-danger);
+  animation: shake var(--duration-base) var(--ease-out);
+}
 
-        .reset-btn {
-            margin-top: auto;
-            padding: 12px;
-            background: transparent;
-            border: 1px solid var(--accent-red);
-            color: var(--accent-red);
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all 0.2s;
-        }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
 
-        .reset-btn:hover {
-            background: rgba(255, 0, 64, 0.1);
-        }
+/* ============================================
+   FORMS
+   ============================================ */
+.field {
+  margin-bottom: var(--space-4);
+}
 
-        @media (max-width: 768px) {
-            .sidebar { width: 100%; height: auto; position: relative; }
-            .main-content { margin-left: 0; padding: 20px; }
-            body { flex-direction: column; }
-        }
-    </style>
+.field-label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-2);
+}
+
+.field-input,
+.field-select {
+  width: 100%;
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.field-input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.field-input:hover,
+.field-select:hover {
+  border-color: var(--color-border-strong);
+}
+
+.field-input:focus,
+.field-select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  background: var(--color-surface);
+  box-shadow: 0 0 0 3px var(--color-accent-subtle);
+}
+
+.field-input:read-only {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.field-hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  margin-top: var(--space-2);
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:active:not(:disabled) {
+  background: var(--color-accent-pressed);
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: var(--color-surface-overlay);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--color-surface-sunken);
+  border-color: var(--color-border-strong);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--color-surface-overlay);
+  color: var(--color-text-primary);
+}
+
+.btn-danger {
+  background: var(--color-danger-subtle);
+  color: var(--color-danger);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: var(--color-danger);
+  color: white;
+}
+
+.btn-row {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  flex-wrap: wrap;
+}
+
+/* ============================================
+   TERMINAL
+   ============================================ */
+.terminal {
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--color-success);
+  margin-top: var(--space-4);
+  min-height: 100px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  position: relative;
+}
+
+.terminal-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  font-family: var(--font-sans);
+}
+
+.terminal-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-danger);
+}
+.terminal-dot:nth-child(2) { background: var(--color-warning); }
+.terminal-dot:nth-child(3) { background: var(--color-success); }
+
+.terminal.error {
+  color: var(--color-danger);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.terminal.success {
+  color: var(--color-success);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+/* ============================================
+   FEEDBACK PANELS
+   ============================================ */
+.feedback {
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  display: none;
+  animation: fadeIn var(--duration-base) var(--ease-out);
+}
+
+.feedback.visible {
+  display: block;
+}
+
+.feedback.hint {
+  background: var(--color-warning-subtle);
+  border-left: 3px solid var(--color-warning);
+  color: #fcd34d;
+}
+
+.feedback.solution {
+  background: var(--color-success-subtle);
+  border-left: 3px solid var(--color-success);
+  color: #86efac;
+}
+
+.feedback code {
+  background: rgba(0,0,0,0.3);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-info);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   FLAG DISPLAY
+   ============================================ */
+.flag {
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  background: var(--color-success-subtle);
+  border: 1px dashed var(--color-success);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-success);
+  text-align: center;
+  display: none;
+  animation: pulse 1.5s var(--ease-out);
+  letter-spacing: 0.5px;
+}
+
+.flag.visible {
+  display: block;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.95); opacity: 0; }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ============================================
+   EMPTY / LOADING STATES
+   ============================================ */
+.empty-state {
+  text-align: center;
+  padding: var(--space-12) var(--space-6);
+  color: var(--color-text-secondary);
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: var(--space-4);
+  opacity: 0.5;
+}
+
+.empty-state-title {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.empty-state-text {
+  font-size: var(--text-sm);
+  max-width: 40ch;
+  margin: 0 auto;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 900px) {
+  body { flex-direction: column; }
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .main {
+    margin-left: 0;
+    padding: var(--space-6);
+  }
+  .level-title { font-size: var(--text-2xl); }
+}
+
+@media (max-width: 500px) {
+  .btn-row { flex-direction: column; }
+  .btn-row .btn { width: 100%; }
+}
+</style>
 </head>
 <body>
 
-    <aside class="sidebar">
-        <div class="logo">HackMe_CTF</div>
-        
-        <div class="progress-container">
-            <div class="progress-label">
-                <span>Прогресс</span>
-                <span id="progress-text">0/10</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progress-fill"></div>
-            </div>
-        </div>
+<a href="#main" class="skip-link">Перейти к содержимому</a>
 
-        <ul class="level-list" id="level-list">
-            <!-- Generated by JS -->
-        </ul>
+<aside class="sidebar" aria-label="Навигация по уровням">
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true">&gt;_</div>
+    <span>HackMe</span>
+  </div>
 
-        <button class="reset-btn" onclick="resetProgress()">Сбросить прогресс</button>
-    </aside>
+  <div class="progress-section">
+    <div class="progress-header">
+      <span class="progress-label">Прогресс</span>
+      <span class="progress-value" id="progress-value" aria-live="polite">0 / 10</span>
+    </div>
+    <div class="progress-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
 
-    <main class="main-content" id="main-content">
-        <!-- Level content injected here -->
-    </main>
+  <ul class="level-nav" id="level-nav" role="list"></ul>
 
-    <script>
-        // --- DATA ---
-        const levels = [
-            {
-                id: 1,
-                title: "SQL Injection",
-                difficulty: "easy",
-                desc: "Обойдите форму входа, используя классическую SQL-инъекцию. Цель: войти как администратор без знания пароля.",
-                html: `
-                    <div class="input-group">
-                        <label>Username</label>
-                        <input type="text" id="sqli-user" placeholder="admin">
-                    </div>
-                    <div class="input-group">
-                        <label>Password</label>
-                        <input type="password" id="sqli-pass" placeholder="••••••">
-                    </div>
-                    <button class="btn btn-primary" onclick="checkLevel1()">Войти</button>
-                    <div class="terminal" id="sqli-term">Ожидание ввода...</div>
-                `,
-                check: () => {
-                    const user = document.getElementById('sqli-user').value;
-                    if (user.includes("' OR '1'='1") || user.includes("admin'--") || user.includes("' OR 1=1--")) {
-                        return true;
-                    }
-                    return false;
-                },
-                hints: [
-                    "Попробуйте ввести что-то, что всегда будет истинным в условии WHERE.",
-                    "Классический пейлоад начинается с одинарной кавычки: ' OR ...",
-                    "Попробуйте: admin' OR '1'='1"
-                ],
-                solution: "Введите <code>admin' OR '1'='1</code> в поле Username. Это закрывает строку и добавляет условие, которое всегда истинно, обходя проверку пароля."
-            },
-            {
-                id: 2,
-                title: "Reflected XSS",
-                difficulty: "easy",
-                desc: "Поле поиска отражает ваш запрос на странице. Внедрите JavaScript, чтобы вызвать alert() и получить флаг.",
-                html: `
-                    <div class="input-group">
-                        <label>Поиск по сайту</label>
-                        <input type="text" id="xss-input" placeholder="Введите запрос...">
-                    </div>
-                    <button class="btn btn-primary" onclick="checkLevel2()">Найти</button>
-                    <div class="terminal" id="xss-term">Результат поиска появится здесь...</div>
-                `,
-                check: () => {
-                    const val = document.getElementById('xss-input').value;
-                    if (val.toLowerCase().includes('<script>') && val.toLowerCase().includes('alert')) {
-                        return true;
-                    }
-                    return false;
-                },
-                hints: [
-                    "Вам нужно закрыть контекст HTML и открыть тег script.",
-                    "Попробуйте использовать <script>alert(1)</script>",
-                    "Система ищет именно тег <script> с функцией alert внутри."
-                ],
-                solution: "Введите <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code>. Браузер выполнит код, и симуляция покажет успешную эксплуатацию."
-            },
-            {
-                id: 3,
-                title: "Command Injection",
-                difficulty: "medium",
-                desc: "Утилита ping уязвима к внедрению команд. Выполните команду чтения файла flag.txt после IP-адреса.",
-                html: `
-                    <div class="input-group">
-                        <label>Целевой IP</label>
-                        <input type="text" id="cmd-input" placeholder="127.0.0.1">
-                    </div>
-                    <button class="btn btn-primary" onclick="checkLevel3()">Ping</button>
-                    <div class="terminal" id="cmd-term">root@hackme:~$ </div>
-                `,
-                check: () => {
-                    const val = document.getElementById('cmd-input').value;
-                    if ((val.includes(';') || val.includes('&&') || val.includes('|')) && val.includes('cat') && val.includes('flag')) {
-                        return true;
-                    }
-                    return false;
-                },
-                hints: [
-                    "Используйте разделитель команд: ; или &&",
-                    "После разделителя выполните команду чтения файла.",
-                    "Попробуйте: 127.0.0.1; cat flag.txt"
-                ],
-                solution: "Введите <code>127.0.0.1; cat flag.txt</code>. Разделитель ; завершает команду ping и начинает новую команду чтения файла."
-            },
-            {
-                id: 4,
-                title: "Directory Traversal",
-                difficulty: "medium",
-                desc: "Веб-приложение позволяет читать файлы. Получите доступ к файлу флага за пределами корневой директории.",
-                html: `
-                    <div class="input-group">
-                        <label>Имя файла</label>
-                        <input type="text" id="dir-input" value="report.txt">
-                    </div>
-                    <button class="btn btn-primary" onclick="checkLevel4()">Прочитать</button>
-                    <div class="terminal" id="dir-term">Содержимое файла...</div>
-                `,
-                check: () => {
-                    const val = document.getElementById('dir-input').value;
-                    if (val.includes('../') && val.includes('flag')) {
-                        return true;
-                    }
-                    return false;
-                },
-                hints: [
-                    "Используйте последовательность ../ для выхода из текущей директории.",
-                    "Вам нужно подняться на несколько уровней вверх.",
-                    "Попробуйте: ../../../../flag.txt"
-                ],
-                solution: "Введите <code>../../../../flag.txt</code>. Последовательность ../ заставляет сервер выйти из ограниченной директории."
-            },
-            {
-                id: 5,
-                title: "Brute Force",
-                difficulty: "easy",
-                desc: "У вас есть только 5 попыток подобрать пароль к аккаунту. Подсказка: это очень распространённый пароль.",
-                html: `
-                    <div class="input-group">
-                        <label>Пароль (Попыток осталось: <span id="attempts">5</span>)</label>
-                        <input type="password" id="bf-input" placeholder="••••••">
-                    </div>
-                    <button class="btn btn-primary" onclick="checkLevel5()">Войти</button>
-                    <div class="terminal" id="bf-term">Ожидание...</div>
-                `,
-                check: () => {
-                    const val = document.getElementById('bf-input').value;
-                    let attempts = parseInt(localStorage.getItem('bf_attempts') || 5);
-                    if (val === 'password123') {
-                        return true;
-                    } else {
-                        attempts--;
-                        localStorage.setItem('bf_attempts', attempts);
-                        document.getElementById('attempts').innerText = attempts;
-                        document.getElementById('bf-term').innerText = `Неверный пароль. Осталось попыток: ${attempts}`;
-                        document.getElementById('bf-term').classList.add('animate-error');
-                        setTimeout(() => document.getElementById('bf-term').classList.remove('animate-error'), 400);
-                        if (attempts <= 0) {
-                            document.getElementById('bf-term').innerText = "Аккаунт заблокирован. Обновите страницу для сброса (но флаг не получить).";
-                        }
-                        return false;
-                    }
-                },
-                hints: [
-                    "Подумайте о самых простых и распространённых паролях.",
-                    "Часто это комбинация слова и цифр.",
-                    "Попробуйте: password123"
-                ],
-                solution: "Введите <code>password123</code>. Это один из самых частых паролей в словарях для брутфорса."
-            },
-            {
-                id: 6,
-                title: "IDOR",
-                difficulty: "medium",
-                desc: "Просмотр профиля пользователя по ID. Найдите способ получить доступ к профилю администратора.",
-                html: `
-                    <div class="input-group">
-                        <label>User ID</label>
-                        <select id="idor-input">
-                            <option value="1">User 1 (Вы)</option>
-                            <option value="2">User 2</option>
-                            <option value="3">User 3</option>
-                        </select>
-                    </div>
-                    <button class="btn btn-primary" onclick="checkLevel6()">Загрузить профиль</button>
-                    <div class="terminal" id="idor-term">Данные профиля...</div>
-                `,
-                check: () => {
-                    const val = document.getElementById('idor-input').value;
-                    if (val === '2' || val === 'admin' || val === '99') {
-                        return true;
-                    }
-                    return false;
-                },
-                hints: [
-                    "ID администратора часто равен 1 или 2.",
-                    "Попробуйте выбрать User 2 из выпадающего списка (или измените значение через DevTools).",
-                    "Система проверяет, равен ли ID 2 или admin."
-                ],
-                solution: "Выберите <code>User 2</code> (или введите 2/99 через консоль). Приложение не проверяет авторизацию, позволяя читать чужие данные."
-            },
-            {
-                id: 7,
-                title: "CSRF",
-                difficulty: "hard",
-                desc: "Симуляция уязвимого банка. Нажмите кнопку ниже, чтобы увидеть, как работает подделка межсайтовых запросов.",
-                html: `
-                    <div class="glass-card" style="text-align: center; padding: 40px;">
-                        <h3 style="margin-bottom: 16px; color: var(--accent-red);">⚠️ Подтверждение перевода</h3>
-                        <p style="color: var(--text-secondary); margin-bottom: 24px;">Вы собираетесь перевести $1000 на счет атакующего.</p>
-                        <button class="btn btn-danger" onclick="checkLevel7()" style="font-size: 16px; padding: 16px 32px;">Подтвердить перевод</button>
-                    </div>
-                    <div class="terminal" id="csrf-term">Ожидание действия...</div>
-                `,
-                check: () => {
-                    return true; // Сам факт нажатия кнопки симулирует успешный CSRF
-                },
-                hints: [
-                    "В реальном сценарии эта форма отправилась бы автоматически при посещении вредоносного сайта.",
-                    "Нажмите кнопку, чтобы симулировать выполнение вредоносного запроса.",
-                    "CSRF использует аутентификацию жертвы в её браузере."
-                ],
-                solution: "Нажатие кнопки симулирует отправку поддельного запроса. Защита: использование CSRF-токенов и SameSite cookie."
-            },
-            {
-                id: 8,
-                title: "File Upload Bypass",
-                difficulty: "hard",
-                desc: "Загрузчик файлов принимает только изображения. Обойдите проверку и загрузите исполняемый скрипт.",
-                html: `
-                    <div class="input-group">
-                        <label>Выберите файл</label>
-                        <input type="file" id="upload-input" accept=".jpg,.png,.gif">
-                    </div>
-                    <button class="btn btn-primary" onclick="checkLevel8()">Загрузить</button>
-                    <div class="terminal" id="upload-term">Статус загрузки...</div>
-                `,
-                check: () => {
-                    const fileInput = document.getElementById('upload-input');
-                    if (fileInput.files.length > 0) {
-                        const name = fileInput.files[0].name.toLowerCase();
-                        if (name.endsWith('.php') || name.endsWith('.sh') || name.endsWith('.exe') || name.includes('.php.')) {
-                            return true;
-                        }
-                    }
-                    return false;
-                },
-                hints: [
-                    "Создайте текстовый файл и переименуйте его в shell.php",
-                    "Некоторые системы проверяют только первое расширение.",
-                    "Попробуйте загрузить файл с именем shell.php или image.php.jpg"
-                ],
-                solution: "Загрузите файл с расширением <code>.php</code> или <code>.sh</code>. Слабая проверка на стороне клиента легко обходится."
-            },
-            {
-                id: 9,
-                title: "JWT Manipulation",
-                difficulty: "expert",
-                desc: "У вас есть токен обычного пользователя. Измените его, чтобы получить роль администратора.",
-                html: `
-                    <div class="input-group">
-                        <label>Ваш текущий JWT (role: user)</label>
-                        <input type="text" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoidXNlciJ9.fake" readonly style="opacity: 0.6;">
-                    </div>
-                    <div class="input-group">
-                        <label>Модифицированный JWT (role: admin)</label>
-                        <input type="text" id="jwt-input" placeholder="Введите подделанный токен...">
-                    </div>
-                    <button class="btn btn-primary" onclick="checkLevel9()">Проверить токен</button>
-                    <div class="terminal" id="jwt-term">Проверка подписи...</div>
-                `,
-                check: () => {
-                    const val = document.getElementById('jwt-input').value;
-                    // Проверяем, содержит ли токен admin в payload (упрощённо)
-                    try {
-                        const parts = val.split('.');
-                        if (parts.length >= 2) {
-                            const payload = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
-                            if (payload.includes('"role":"admin"') || payload.includes('"role": "admin"')) {
-                                return true;
-                            }
-                        }
-                    } catch(e) {}
-                    return false;
-                },
-                hints: [
-                    "JWT состоит из 3 частей, разделённых точкой. Вторая часть — это Base64 закодированный JSON.",
-                    "Декодируйте вторую часть, измените 'user' на 'admin', закодируйте обратно в Base64.",
-                    "Попробуйте ввести токен, где вторая часть декодируется в {\"role\":\"admin\"}"
-                ],
-                solution: "Введите токен, где payload содержит <code>\"role\":\"admin\"</code>. Например: <code>eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiYWRtaW4ifQ.fake</code>. Сервер не проверяет подпись."
-            },
-            {
-                id: 10,
-                title: "SSRF",
-                difficulty: "expert",
-                desc: "Утилита для загрузки содержимого URL. Заставьте сервер сделать запрос к внутреннему ресурсу.",
-                html: `
-                    <div class="input-group">
-                        <label>URL для загрузки</label>
-                        <input type="text" id="ssrf-input" placeholder="https://example.com">
-                    </div>
-                    <button class="btn btn-primary" onclick="checkLevel10()">Загрузить</button>
-                    <div class="terminal" id="ssrf-term">Ожидание URL...</div>
-                `,
-                check: () => {
-                    const val = document.getElementById('ssrf-input').value.toLowerCase();
-                    if (val.includes('localhost') || val.includes('127.0.0.1') || val.includes('internal') || val.includes('0.0.0.0')) {
-                        return true;
-                    }
-                    return false;
-                },
-                hints: [
-                    "Внутренние сервисы часто доступны через localhost или 127.0.0.1",
-                    "Попробуйте запросить http://localhost/admin или http://127.0.0.1/flag",
-                    "SSRF позволяет обходить внешние фаерволы, используя доверие сервера к самому себе."
-                ],
-                solution: "Введите <code>http://localhost/admin</code> или <code>http://127.0.0.1/flag</code>. Сервер выполнит запрос от своего имени и вернёт внутренние данные."
-            }
-        ];
+  <div class="sidebar-footer">
+    <button class="btn btn-ghost" onclick="resetProgress()" style="width:100%;" aria-label="Сбросить весь прогресс">
+      Сбросить прогресс
+    </button>
+  </div>
+</aside>
 
-        // --- STATE ---
-        let currentLevel = 1;
-        let completedLevels = JSON.parse(localStorage.getItem('hackme_completed') || '[]');
+<main class="main" id="main" role="main">
+  <div id="content" aria-live="polite"></div>
+</main>
 
-        // --- INIT ---
-        function init() {
-            renderSidebar();
-            loadLevel(currentLevel);
-            updateProgress();
-        }
+<script>
+/* ============================================
+   LEVEL DEFINITIONS
+   ============================================ */
+var levels = [
+  {
+    id: 1,
+    title: "SQL Injection",
+    difficulty: "easy",
+    description: "Форма входа проверяет учётные данные через SQL-запрос. Войдите как администратор, не зная пароля.",
+    html: '<div class="field"><label class="field-label" for="l1-user">Username</label><input class="field-input" type="text" id="l1-user" placeholder="admin" autocomplete="off"></div><div class="field"><label class="field-label" for="l1-pass">Password</label><input class="field-input" type="password" id="l1-pass" placeholder="••••••••" autocomplete="off"></div><button class="btn btn-primary" onclick="runLevel1()">Войти</button>',
+    check: function() {
+      var u = document.getElementById('l1-user').value;
+      return u.indexOf("' OR '1'='1") !== -1 || u.indexOf("admin'--") !== -1 || u.indexOf("' OR 1=1--") !== -1;
+    },
+    successText: 'Доступ разрешён. Добро пожаловать, admin.\n\nВы обошли проверку пароля, сделав условие WHERE всегда истинным.',
+    errorText: 'Ошибка входа: неверный логин или пароль.',
+    hints: [
+      'SQL-запрос выглядит так: SELECT * FROM users WHERE username=\'' + '{ввод}' + '\' AND password=\'' + '{ввод}' + '\'',
+      'Одинарная кавычка закрывает строку. Добавьте условие, которое всегда истинно.',
+      'Попробуйте: admin\' OR \'1\'=\'1'
+    ],
+    solution: 'Введите <code>admin\' OR \'1\'=\'1</code> в поле Username. Кавычка закрывает строку, а <code>OR \'1\'=\'1\'</code> делает условие всегда истинным. Защита: параметризованные запросы.'
+  },
+  {
+    id: 2,
+    title: "Reflected XSS",
+    difficulty: "easy",
+    description: "Поле поиска выводит ваш запрос прямо на страницу без экранирования. Выполните произвольный JavaScript.",
+    html: '<div class="field"><label class="field-label" for="l2-input">Поиск по сайту</label><input class="field-input" type="text" id="l2-input" placeholder="Введите запрос..."></div><button class="btn btn-primary" onclick="runLevel2()">Найти</button>',
+    check: function() {
+      var v = document.getElementById('l2-input').value.toLowerCase();
+      return v.indexOf('<script>') !== -1 && v.indexOf('alert') !== -1;
+    },
+    successText: '[ALERT TRIGGERED]\n\nXSS выполнен успешно. JavaScript отрендерился в контексте страницы.',
+    errorText: 'Результат поиска выведен как обычный текст. JavaScript не выполнился.',
+    hints: [
+      'Сервер вставляет ваш запрос в HTML без экранирования.',
+      'Вам нужно выйти из текстового контекста и открыть тег script.',
+      'Попробуйте: <script>alert(1)</script>'
+    ],
+    solution: 'Введите <code>&lt;script&gt;alert(\'XSS\')&lt;/script&gt;</code>. Браузер выполнит код. Защита: экранирование вывода, Content-Security-Policy.'
+  },
+  {
+    id: 3,
+    title: "Command Injection",
+    difficulty: "medium",
+    description: "Утилита ping передаёт ваш ввод напрямую в shell. Прочитайте файл flag.txt.",
+    html: '<div class="field"><label class="field-label" for="l3-input">Целевой IP-адрес</label><input class="field-input" type="text" id="l3-input" placeholder="127.0.0.1"></div><button class="btn btn-primary" onclick="runLevel3()">Ping</button>',
+    check: function() {
+      var v = document.getElementById('l3-input').value;
+      var hasSep = v.indexOf(';') !== -1 || v.indexOf('&&') !== -1 || v.indexOf('|') !== -1 || v.indexOf('||') !== -1;
+      return hasSep && v.indexOf('cat') !== -1 && v.indexOf('flag') !== -1;
+    },
+    successText: 'PING 127.0.0.1 (127.0.0.1): 56 data bytes\n64 bytes from 127.0.0.1: icmp_seq=0 ttl=64 time=0.042 ms\n\n--- 127.0.0.1 ping statistics ---\n1 packets transmitted, 1 received, 0.0% packet loss\n\n$ cat flag.txt\nFLAG{command_injection_master}',
+    errorText: 'ping: cannot resolve ' + '{ввод}' + ': Unknown host',
+    hints: [
+      'Команда выполняется как: ping ' + '{ввод}',
+      'Разделитель ; завершает ping и начинает новую команду.',
+      'Попробуйте: 127.0.0.1; cat flag.txt'
+    ],
+    solution: 'Введите <code>127.0.0.1; cat flag.txt</code>. Точка с запятой завершает ping и запускает cat. Защита: whitelist валидация, отсутствие shell-интерполяции.'
+  },
+  {
+    id: 4,
+    title: "Directory Traversal",
+    difficulty: "medium",
+    description: "Веб-приложение раздаёт файлы из директории /var/www/docs. Получите файл за её пределами.",
+    html: '<div class="field"><label class="field-label" for="l4-input">Имя файла</label><input class="field-input" type="text" id="l4-input" value="report.txt"></div><button class="btn btn-primary" onclick="runLevel4()">Открыть файл</button>',
+    check: function() {
+      var v = document.getElementById('l4-input').value;
+      return v.indexOf('../') !== -1 && v.indexOf('flag') !== -1;
+    },
+    successText: '=== /etc/flag.txt ===\n\nFLAG{path_traversal_king}\n\n=====================',
+    errorText: '404 Not Found: файл "' + '{ввод}' + '" не найден в директории /var/www/docs/',
+    hints: [
+      'Сервер склеивает путь: /var/www/docs/' + '{ввод}',
+      'Последовательность ../ поднимает на уровень выше.',
+      'Попробуйте: ../../../../etc/flag.txt'
+    ],
+    solution: 'Введите <code>../../../../etc/flag.txt</code>. Каждый ../ поднимает на уровень, выходя за пределы /var/www/docs/. Защита: canonicalize path, reject ../.'
+  },
+  {
+    id: 5,
+    title: "Brute Force",
+    difficulty: "easy",
+    description: "У вас 5 попыток войти в аккаунт. Пароль — один из самых распространённых в мире.",
+    html: '<div class="field"><label class="field-label" for="l5-input">Пароль <span style="color:var(--color-text-tertiary);font-weight:400;">(осталось: <span id="l5-count">5</span>)</span></label><input class="field-input" type="password" id="l5-input" placeholder="••••••••"></div><button class="btn btn-primary" onclick="runLevel5()">Войти</button>',
+    check: function() {
+      var v = document.getElementById('l5-input').value;
+      return v === 'password123';
+    },
+    successText: 'Доступ разрешён.\n\nДобро пожаловать, user@hackme.local\nПоследний вход: никогда.',
+    errorText: 'Неверный пароль.',
+    hints: [
+      'Самые частые пароли: 123456, password, qwerty...',
+      'Часто это слово + цифры.',
+      'Попробуйте: password123'
+    ],
+    solution: 'Пароль — <code>password123</code>. Он годами входит в топ-10 словарей брутфорса. Защита: rate limiting, 2FA, блокировка после N попыток.'
+  },
+  {
+    id: 6,
+    title: "IDOR",
+    difficulty: "medium",
+    description: "Профили пользователей доступны по числовому ID в URL. Приложение не проверяет права доступа.",
+    html: '<div class="field"><label class="field-label" for="l6-input">User ID</label><select class="field-select" id="l6-input"><option value="1">1 — Вы (guest)</option><option value="2">2 — alice</option><option value="3">3 — bob</option></select></div><button class="btn btn-primary" onclick="runLevel6()">Загрузить профиль</button>',
+    check: function() {
+      var v = document.getElementById('l6-input').value;
+      return v === '2' || v === '99' || v === 'admin';
+    },
+    successText: '=== ПРОФИЛЬ АДМИНИСТРАТОРА ===\n\nID: 2\nUsername: admin\nRole: superuser\nEmail: admin@hackme.local\nSecret: FLAG{idor_no_authz_check}\n\n=================================',
+    errorText: '=== ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ ===\n\nID: ' + '{ввод}' + '\nUsername: guest\nRole: user\nBio: Обычный пользователь.',
+    hints: [
+      'Приложение показывает профиль по ID без проверки, что это ваш профиль.',
+      'Администратор обычно имеет ID 1 или 2.',
+      'Выберите User 2 из списка.'
+    ],
+    solution: 'Выберите <code>User 2</code>. Приложение не проверяет, что ID принадлежит текущему пользователю. Защита: server-side authorization check на каждый запрос.'
+  },
+  {
+    id: 7,
+    title: "CSRF",
+    difficulty: "hard",
+    description: "Банк не проверяет источник запроса на перевод. Подтвердите перевод, чтобы увидеть последствия.",
+    html: '<div style="text-align:center;padding:var(--space-8) 0;"><div style="font-size:48px;margin-bottom:var(--space-4);">⚠️</div><h3 style="font-size:var(--text-xl);font-weight:600;margin-bottom:var(--space-3);color:var(--color-danger);">Подтверждение перевода</h3><p style="color:var(--color-text-secondary);margin-bottom:var(--space-6);max-width:40ch;margin-left:auto;margin-right:auto;">Вы собираетесь перевести <strong style="color:var(--color-text-primary);">$1,000.00</strong> на счёт <code style="background:var(--color-surface-sunken);padding:2px 6px;border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:var(--text-sm);">attacker@evil.com</code></p><button class="btn btn-danger" onclick="runLevel7()" style="padding:var(--space-4) var(--space-8);font-size:var(--text-base);">Подтвердить перевод</button></div>',
+    check: function() { return true; },
+    successText: '[SUCCESS] Перевод $1,000.00 выполнен.\n\nПолучатель: attacker@evil.com\nID транзакции: tx_8f3a2b1c\n\nВ реальном сценарии эта форма отправилась бы автоматически при посещении вредоносного сайта, пока вы авторизованы в банке.',
+    errorText: '',
+    hints: [
+      'В реальном CSRF жертва даже не нажимает кнопку — форма отправляется сама.',
+      'Атака работает, потому что браузер автоматически прикрепляет cookies к запросу.',
+      'Нажмите кнопку, чтобы увидеть симуляцию.'
+    ],
+    solution: 'Нажатие кнопки симулирует CSRF. Защита: CSRF-токены в формах, SameSite=Strict cookies, проверка Origin/Referer.'
+  },
+  {
+    id: 8,
+    title: "File Upload Bypass",
+    difficulty: "hard",
+    description: "Загрузчик изображений проверяет расширение файла только на клиенте. Загрузите исполняемый скрипт.",
+    html: '<div class="field"><label class="field-label" for="l8-input">Выберите файл</label><input class="field-input" type="file" id="l8-input" accept=".jpg,.png,.gif"></div><div class="field-hint">Разрешены только изображения: .jpg, .png, .gif</div><button class="btn btn-primary" onclick="runLevel8()">Загрузить</button>',
+    check: function() {
+      var f = document.getElementById('l8-input');
+      if (f.files.length === 0) return false;
+      var n = f.files[0].name.toLowerCase();
+      return n.indexOf('.php') !== -1 || n.indexOf('.sh') !== -1 || n.indexOf('.exe') !== -1 || n.indexOf('.asp') !== -1;
+    },
+    successText: '[WARNING] Файл загружен и исполнен на сервере.\n\nReverse shell установлен.\nFLAG{upload_no_server_validation}',
+    errorText: '[ERROR] Недопустимый тип файла. Разрешены только .jpg, .png, .gif',
+    hints: [
+      'Проверка расширения работает только в браузере.',
+      'Создайте текстовый файл и переименуйте его в shell.php',
+      'Загрузите файл с расширением .php'
+    ],
+    solution: 'Загрузите файл с именем <code>shell.php</code>. Клиентская проверка обходится за секунду. Защита: server-side валидация MIME + содержимого, хранение вне webroot.'
+  },
+  {
+    id: 9,
+    title: "JWT Manipulation",
+    difficulty: "expert",
+    description: "Токен подписан алгоритмом none. Измените payload, чтобы получить роль admin.",
+    html: '<div class="field"><label class="field-label">Текущий токен (role: user)</label><input class="field-input" type="text" value="eyJhbGciOiJub25lIn0.eyJ1c2VyIjoiZ3Vlc3QiLCJyb2xlIjoidXNlciJ9." readonly></div><div class="field"><label class="field-label" for="l9-input">Модифицированный токен (role: admin)</label><input class="field-input" type="text" id="l9-input" placeholder="eyJhbGciOiJub25lIn0.eyJ1c2VyIjoiZ3Vlc3QiLCJyb2xlIjoiYWRtaW4ifQ."></div><button class="btn btn-primary" onclick="runLevel9()">Проверить токен</button>',
+    check: function() {
+      var v = document.getElementById('l9-input').value.trim();
+      try {
+        var parts = v.split('.');
+        if (parts.length < 2) return false;
+        var payload = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
+        return payload.indexOf('admin') !== -1;
+      } catch(e) { return false; }
+    },
+    successText: '[SUCCESS] Токен принят.\n\nUser: guest\nRole: admin\nAccess: full\n\nFLAG{jwt_none_algorithm_abuse}',
+    errorText: '[ERROR] 403 Forbidden: недостаточные права или невалидный токен.',
+    hints: [
+      'Алгоритм подписи — "none". Сервер не проверяет подпись вообще.',
+      'Вторая часть токена — это Base64-encoded JSON. Декодируйте, измените, закодируйте обратно.',
+      'Попробуйте: eyJhbGciOiJub25lIn0.eyJ1c2VyIjoiZ3Vlc3QiLCJyb2xlIjoiYWRtaW4ifQ.'
+    ],
+    solution: 'Введите <code>eyJhbGciOiJub25lIn0.eyJ1c2VyIjoiZ3Vlc3QiLCJyb2xlIjoiYWRtaW4ifQ.</code> — токен с payload {"user":"guest","role":"admin"}. Сервер принимает любой токен с alg:none. Защита: reject alg:none, использовать HS256/RS256.'
+  },
+  {
+    id: 10,
+    title: "SSRF",
+    difficulty: "expert",
+    description: "Утилита загружает содержимое URL от имени сервера. Получите доступ к внутреннему сервису.",
+    html: '<div class="field"><label class="field-label" for="l10-input">URL для загрузки</label><input class="field-input" type="text" id="l10-input" placeholder="https://example.com"></div><button class="btn btn-primary" onclick="runLevel10()">Загрузить</button>',
+    check: function() {
+      var v = document.getElementById('l10-input').value.toLowerCase().trim();
+      return v.indexOf('localhost') !== -1 || v.indexOf('127.0.0.1') !== -1 || v.indexOf('internal') !== -1 || v.indexOf('0.0.0.0') !== -1 || v.indexOf('169.254') !== -1;
+    },
+    successText: 'HTTP/1.1 200 OK\nServer: InternalMetadataService/1.0\nContent-Type: application/json\n\n{\n  "service": "admin-panel",\n  "endpoint": "/internal/flag",\n  "flag": "FLAG{ssrf_cloud_metadata_leak}",\n  "credentials": {\n    "access_key": "AKIA...",\n    "secret_key": "[REDACTED]"\n  }\n}',
+    errorText: '[ERROR] Request failed: host unreachable or blocked by egress policy.',
+    hints: [
+      'Сервер делает запрос от своего имени — он доверяет самому себе.',
+      'Внутренние сервисы часто доступны по localhost или 127.0.0.1.',
+      'Попробуйте: http://localhost/admin/flag или http://169.254.169.254/latest/meta-data/'
+    ],
+    solution: 'Введите <code>http://localhost/admin/flag</code> или <code>http://169.254.169.254/latest/meta-data/</code> (AWS metadata). Сервер выполнит запрос из своей сети. Защита: denylist внутренних IP, allowlist доменов, network segmentation.'
+  }
+];
 
-        function renderSidebar() {
-            const list = document.getElementById('level-list');
-            list.innerHTML = '';
-            
-            levels.forEach(level => {
-                const li = document.createElement('li');
-                li.className = 'level-item';
-                if (level.id === currentLevel) li.classList.add('active');
-                if (completedLevels.includes(level.id)) li.classList.add('completed');
-                if (level.id > Math.max(...completedLevels, 0) + 1 && !completedLevels.includes(level.id)) {
-                    li.classList.add('locked');
-                }
-                
-                li.innerHTML = `
-                    <span class="level-num">${String(level.id).padStart(2, '0')}</span>
-                    <span>${level.title}</span>
-                `;
-                
-                if (!li.classList.contains('locked')) {
-                    li.onclick = () => {
-                        currentLevel = level.id;
-                        renderSidebar();
-                        loadLevel(currentLevel);
-                    };
-                }
-                list.appendChild(li);
-            });
-        }
+/* ============================================
+   STATE
+   ============================================ */
+var currentLevelId = 1;
+var completedIds = [];
+var hintIndex = 0;
 
-        function loadLevel(id) {
-            const level = levels.find(l => l.id === id);
-            const main = document.getElementById('main-content');
-            
-            let hintsHtml = level.hints.map((h, i) => 
-                `<div class="hint-box" id="hint-${i+1}" style="display:none; margin-top:8px;">💡 Подсказка ${i+1}: ${h}</div>`
-            ).join('');
+try {
+  var stored = localStorage.getItem('hackme_completed_v2');
+  if (stored) completedIds = JSON.parse(stored);
+} catch(e) {
+  completedIds = [];
+}
 
-            main.innerHTML = `
-                <div class="level-header animate-fade">
-                    <div class="level-title">
-                        ${level.title}
-                        <span class="badge ${level.difficulty}">${level.difficulty}</span>
-                    </div>
-                    <p class="level-desc">${level.desc}</p>
-                </div>
+/* ============================================
+   RENDER
+   ============================================ */
+function render() {
+  renderNav();
+  renderLevel(currentLevelId);
+  updateProgress();
+}
 
-                <div class="glass-card animate-fade">
-                    ${level.html}
-                    <div class="flag-display" id="flag-display">FLAG{...}</div>
-                </div>
+function renderNav() {
+  var nav = document.getElementById('level-nav');
+  nav.innerHTML = '';
+  var maxUnlocked = 1;
+  if (completedIds.length > 0) {
+    var max = 0;
+    for (var i = 0; i < completedIds.length; i++) {
+      if (completedIds[i] > max) max = completedIds[i];
+    }
+    maxUnlocked = max + 1;
+  }
 
-                <div class="actions">
-                    <button class="btn btn-secondary" onclick="showHint()">Показать подсказку</button>
-                    <button class="btn btn-secondary" onclick="toggleSolution()">Показать решение</button>
-                </div>
+  for (var i = 0; i < levels.length; i++) {
+    var lv = levels[i];
+    var li = document.createElement('li');
+    var btn = document.createElement('button');
+    btn.className = 'level-link';
+    btn.setAttribute('role', 'listitem');
 
-                <div class="hint-box" id="hints-container" style="display:none;">
-                    ${hintsHtml}
-                </div>
+    var isCompleted = completedIds.indexOf(lv.id) !== -1;
+    var isLocked = lv.id > maxUnlocked && !isCompleted;
+    var isActive = lv.id === currentLevelId;
 
-                <div class="solution-box" id="solution-box" style="display:none;">
-                    <strong>Решение:</strong> ${level.solution}
-                </div>
-            `;
-            
-            window.currentHint = 0;
-        }
+    if (isCompleted) btn.classList.add('completed');
+    if (isLocked) btn.classList.add('locked');
+    if (isActive) btn.classList.add('active');
 
-        // --- LOGIC ---
-        function showHint() {
-            const container = document.getElementById('hints-container');
-            container.style.display = 'block';
-            if (window.currentHint < 3) {
-                window.currentHint++;
-                document.getElementById(`hint-${window.currentHint}`).style.display = 'block';
-            }
-        }
+    btn.setAttribute('aria-label', 'Уровень ' + lv.id + ': ' + lv.title + (isCompleted ? ', пройден' : '') + (isLocked ? ', заблокирован' : ''));
 
-        function toggleSolution() {
-            const box = document.getElementById('solution-box');
-            box.style.display = box.style.display === 'none' ? 'block' : 'none';
-        }
+    btn.innerHTML = '<span class="level-number">' + pad(lv.id) + '</span><span class="level-name">' + lv.title + '</span><span class="level-difficulty ' + lv.difficulty + '">' + lv.difficulty + '</span>';
 
-        function showSuccess(level) {
-            const flagBox = document.getElementById('flag-display');
-            flagBox.innerText = `FLAG{${level.title.replace(/\s+/g, '_').toLowerCase()}_master}`;
-            flagBox.style.display = 'block';
-            
-            const card = document.querySelector('.glass-card');
-            card.classList.add('animate-success');
-            
-            if (!completedLevels.includes(level.id)) {
-                completedLevels.push(level.id);
-                localStorage.setItem('hackme_completed', JSON.stringify(completedLevels));
-                updateProgress();
-                renderSidebar();
-            }
-        }
+    if (!isLocked) {
+      btn.addEventListener('click', (function(id) {
+        return function() {
+          currentLevelId = id;
+          hintIndex = 0;
+          render();
+          document.getElementById('main').focus();
+        };
+      })(lv.id));
+    }
 
-        function showError() {
-            const card = document.querySelector('.glass-card');
-            card.classList.add('animate-error');
-            setTimeout(() => card.classList.remove('animate-error'), 400);
-        }
+    li.appendChild(btn);
+    nav.appendChild(li);
+  }
+}
 
-        function updateProgress() {
-            const pct = (completedLevels.length / levels.length) * 100;
-            document.getElementById('progress-fill').style.width = pct + '%';
-            document.getElementById('progress-text').innerText = `${completedLevels.length}/${levels.length}`;
-        }
+function renderLevel(id) {
+  var lv = null;
+  for (var i = 0; i < levels.length; i++) {
+    if (levels[i].id === id) { lv = levels[i]; break; }
+  }
+  if (!lv) return;
 
-        function resetProgress() {
-            if (confirm('Сбросить весь прогресс?')) {
-                localStorage.removeItem('hackme_completed');
-                localStorage.removeItem('bf_attempts');
-                completedLevels = [];
-                currentLevel = 1;
-                init();
-            }
-        }
+  var content = document.getElementById('content');
+  var isCompleted = completedIds.indexOf(lv.id) !== -1;
 
-        // --- LEVEL CHECKERS ---
-        function checkLevel1() {
-            if (levels[0].check()) {
-                document.getElementById('sqli-term').innerText = "Доступ разрешён. Добро пожаловать, admin.\n\nFLAG{sql_master_2024}";
-                showSuccess(levels[0]);
-            } else {
-                document.getElementById('sqli-term').innerText = "Ошибка входа: Неверный логин или пароль.";
-                showError();
-            }
-        }
+  var html = '';
+  html += '<div class="level-header">';
+  html += '<div class="level-eyebrow">Уровень ' + pad(lv.id) + ' из 10</div>';
+  html += '<h1 class="level-title">' + lv.title + '</h1>';
+  html += '<p class="level-description">' + lv.description + '</p>';
+  html += '</div>';
 
-        function checkLevel2() {
-            if (levels[1].check()) {
-                document.getElementById('xss-term').innerHTML = "<span style='color:#ff0040'>[ALERT TRIGGERED]</span><br>Успешное выполнение XSS!<br>FLAG{xss_reflected_win}";
-                showSuccess(levels[1]);
-            } else {
-                document.getElementById('xss-term').innerText = `Результат поиска: ${document.getElementById('xss-input').value}`;
-                showError();
-            }
-        }
+  html += '<div class="card" id="level-card">';
+  html += lv.html;
+  html += '<div class="terminal" id="terminal" aria-live="polite"><div class="terminal-header"><span class="terminal-dot"></span><span class="terminal-dot"></span><span class="terminal-dot"></span><span style="margin-left:var(--space-2);">hackme@ctf:~</span></div><div id="terminal-body">Готов к вводу. Выполните задание выше.</div></div>';
+  html += '<div class="flag" id="flag" role="status" aria-label="Флаг найден"></div>';
+  html += '</div>';
 
-        function checkLevel3() {
-            if (levels[2].check()) {
-                document.getElementById('cmd-term').innerText = "PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.\n64 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.032 ms\n\n--- ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss\n\nroot@hackme:~$ cat flag.txt\nFLAG{cmd_injection_pro}";
-                showSuccess(levels[2]);
-            } else {
-                document.getElementById('cmd-term').innerText = `PING ${document.getElementById('cmd-input').value}: Name or service not known`;
-                showError();
-            }
-        }
+  html += '<div class="btn-row">';
+  html += '<button class="btn btn-secondary" onclick="showHint()" id="btn-hint">Подсказка <span id="hint-counter" style="opacity:0.6;font-weight:400;">(0/3)</span></button>';
+  html += '<button class="btn btn-ghost" onclick="toggleSolution()">Решение</button>';
+  html += '</div>';
 
-        function checkLevel4() {
-            if (levels[3].check()) {
-                document.getElementById('dir-term').innerText = "=== Содержимое /etc/flag.txt ===\n\nFLAG{dir_traversal_king}\n\n===============================";
-                showSuccess(levels[3]);
-            } else {
-                document.getElementById('dir-term').innerText = `Чтение файла: ${document.getElementById('dir-input').value}\n[ERROR] Файл не найден или доступ запрещён.`;
-                showError();
-            }
-        }
+  html += '<div id="hints-area"></div>';
+  html += '<div class="feedback solution" id="solution-panel"><strong>Решение:</strong> ' + lv.solution + '</div>';
 
-        function checkLevel5() {
-            if (levels[4].check()) {
-                document.getElementById('bf-term').innerText = "Доступ разрешён.\n\nFLAG{brute_force_success}";
-                showSuccess(levels[4]);
-            } else {
-                // Логика ошибок уже внутри check()
-            }
-        }
+  content.innerHTML = html;
 
-        function checkLevel6() {
-            if (levels[5].check()) {
-                document.getElementById('idor-term').innerText = "=== ПРОФИЛЬ АДМИНИСТРАТОРА ===\nUser: admin\nRole: superuser\nSecret: FLAG{idor_admin_access}\n==============================";
-                showSuccess(levels[5]);
-            } else {
-                document.getElementById('idor-term').innerText = "=== ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ ===\nUser: guest\nRole: user\nBio: Обычный пользователь.\n==============================";
-                showError();
-            }
-        }
+  if (isCompleted) {
+    showFlagForLevel(lv);
+  }
+}
 
-        function checkLevel7() {
-            if (levels[6].check()) {
-                document.getElementById('csrf-term').innerText = "[SUCCESS] Перевод $1000 выполнен на счет атакующего.\nАутентификация жертвы использована автоматически.\n\nFLAG{csrf_token_stolen}";
-                showSuccess(levels[6]);
-            }
-        }
+function showFlagForLevel(lv) {
+  var flagName = lv.title.toLowerCase().replace(/\s+/g, '_');
+  var flagEl = document.getElementById('flag');
+  flagEl.textContent = 'FLAG{' + flagName + '_master}';
+  flagEl.classList.add('visible');
+  var card = document.getElementById('level-card');
+  if (card) card.classList.add('success');
+  var term = document.getElementById('terminal-body');
+  if (term) term.textContent = lv.successText;
+}
 
-        function checkLevel8() {
-            if (levels[7].check()) {
-                document.getElementById('upload-term').innerText = "[WARNING] Обход проверки расширения!\nФайл загружен и исполнен.\n\nFLAG{upload_bypass_shell}";
-                showSuccess(levels[7]);
-            } else {
-                document.getElementById('upload-term').innerText = "[ERROR] Разрешены только файлы .jpg, .png, .gif";
-                showError();
-            }
-        }
+/* ============================================
+   PROGRESS
+   ============================================ */
+function updateProgress() {
+  var count = completedIds.length;
+  var pct = Math.round((count / levels.length) * 100);
+  document.getElementById('progress-value').textContent = count + ' / ' + levels.length;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-track').setAttribute('aria-valuenow', pct);
+}
 
-        function checkLevel9() {
-            if (levels[8].check()) {
-                document.getElementById('jwt-term').innerText = "[SUCCESS] Токен принят.\nРоль изменена на: admin\nДоступ к панели управления получен.\n\nFLAG{jwt_admin_takeover}";
-                showSuccess(levels[8]);
-            } else {
-                document.getElementById('jwt-term').innerText = "[ERROR] Неверная подпись или роль не 'admin'.";
-                showError();
-            }
-        }
+function markComplete(lv) {
+  if (completedIds.indexOf(lv.id) === -1) {
+    completedIds.push(lv.id);
+    try {
+      localStorage.setItem('hackme_completed_v2', JSON.stringify(completedIds));
+    } catch(e) {}
+    updateProgress();
+    renderNav();
+  }
+}
 
-        function checkLevel10() {
-            if (levels[9].check()) {
-                document.getElementById('ssrf-term').innerText = "HTTP/1.1 200 OK\nServer: Internal-Admin-Panel/1.0\nContent-Type: text/plain\n\nFLAG{ssrf_internal_network}";
-                showSuccess(levels[9]);
-            } else {
-                document.getElementById('ssrf-term').innerText = "[ERROR] Внешние URL запрещены политикой безопасности или ресурс не найден.";
-                showError();
-            }
-        }
+function resetProgress() {
+  if (!confirm('Сбросить весь прогресс? Это действие нельзя отменить.')) return;
+  try {
+    localStorage.removeItem('hackme_completed_v2');
+  } catch(e) {}
+  completedIds = [];
+  currentLevelId = 1;
+  hintIndex = 0;
+  render();
+}
 
-        // Start
-        init();
-    </script>
+/* ============================================
+   HINTS & SOLUTION
+   ============================================ */
+function showHint() {
+  var lv = getCurrentLevel();
+  if (!lv) return;
+  if (hintIndex >= lv.hints.length) return;
+
+  var area = document.getElementById('hints-area');
+  var panel = document.createElement('div');
+  panel.className = 'feedback hint visible';
+  panel.innerHTML = '<strong>Подсказка ' + (hintIndex + 1) + ':</strong> ' + lv.hints[hintIndex];
+  area.appendChild(panel);
+
+  hintIndex++;
+  var counter = document.getElementById('hint-counter');
+  if (counter) counter.textContent = '(' + hintIndex + '/3)';
+}
+
+function toggleSolution() {
+  var panel = document.getElementById('solution-panel');
+  if (!panel) return;
+  panel.classList.toggle('visible');
+}
+
+/* ============================================
+   TERMINAL FEEDBACK
+   ============================================ */
+function setTerminal(text, state) {
+  var body = document.getElementById('terminal-body');
+  var term = document.getElementById('terminal');
+  if (!body) return;
+  body.textContent = text;
+  if (term) {
+    term.classList.remove('success', 'error');
+    if (state) term.classList.add(state);
+  }
+}
+
+function showSuccess(lv) {
+  var flagName = lv.title.toLowerCase().replace(/\s+/g, '_');
+  var flagEl = document.getElementById('flag');
+  if (flagEl) {
+    flagEl.textContent = 'FLAG{' + flagName + '_master}';
+    flagEl.classList.add('visible');
+  }
+  var card = document.getElementById('level-card');
+  if (card) card.classList.add('success');
+  markComplete(lv);
+}
+
+function showError() {
+  var card = document.getElementById('level-card');
+  if (card) {
+    card.classList.add('error');
+    setTimeout(function() { card.classList.remove('error'); }, 400);
+  }
+}
+
+function getCurrentLevel() {
+  for (var i = 0; i < levels.length; i++) {
+    if (levels[i].id === currentLevelId) return levels[i];
+  }
+  return null;
+}
+
+function pad(n) {
+  return n < 10 ? '0' + n : '' + n;
+}
+
+/* ============================================
+   LEVEL RUNNERS
+   ============================================ */
+function runLevel1() {
+  var lv = levels[0];
+  if (lv.check()) {
+    setTerminal(lv.successText, 'success');
+    showSuccess(lv);
+  } else {
+    setTerminal(lv.errorText, 'error');
+    showError();
+  }
+}
+
+function runLevel2() {
+  var lv = levels[1];
+  if (lv.check()) {
+    setTerminal(lv.successText, 'success');
+    showSuccess(lv);
+  } else {
+    var v = document.getElementById('l2-input').value;
+    setTerminal('Результат поиска: ' + (v || '(пусто)') + '\n\nJavaScript не выполнился — строка выведена как текст.', 'error');
+    showError();
+  }
+}
+
+function runLevel3() {
+  var lv = levels[2];
+  if (lv.check()) {
+    setTerminal(lv.successText, 'success');
+    showSuccess(lv);
+  } else {
+    var v = document.getElementById('l3-input').value || '(пусто)';
+    setTerminal('ping: cannot resolve "' + v + '": Unknown host', 'error');
+    showError();
+  }
+}
+
+function runLevel4() {
+  var lv = levels[3];
+  if (lv.check()) {
+    setTerminal(lv.successText, 'success');
+    showSuccess(lv);
+  } else {
+    var v = document.getElementById('l4-input').value || '(пусто)';
+    setTerminal('404 Not Found: файл "' + v + '" не найден в /var/www/docs/', 'error');
+    showError();
+  }
+}
+
+function runLevel5() {
+  var lv = levels[4];
+  var v = document.getElementById('l5-input').value;
+  var countEl = document.getElementById('l5-count');
+  var attempts = 5;
+  try {
+    var stored = localStorage.getItem('hackme_attempts_l5');
+    if (stored !== null) attempts = parseInt(stored);
+  } catch(e) {}
+
+  if (lv.check()) {
+    setTerminal(lv.successText, 'success');
+    showSuccess(lv);
+  } else {
+    attempts--;
+    try { localStorage.setItem('hackme_attempts_l5', attempts.toString()); } catch(e) {}
+    if (countEl) countEl.textContent = attempts;
+    if (attempts <= 0) {
+      setTerminal('Аккаунт заблокирован после 5 неудачных попыток.\n\nОбновите страницу, чтобы сбросить счётчик (прогресс уровня потеряется).', 'error');
+    } else {
+      setTerminal('Неверный пароль. Осталось попыток: ' + attempts, 'error');
+    }
+    showError();
+  }
+}
+
+function runLevel6() {
+  var lv = levels[5];
+  if (lv.check()) {
+    setTerminal(lv.successText, 'success');
+    showSuccess(lv);
+  } else {
+    var v = document.getElementById('l6-input').value;
+    setTerminal('=== ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ ===\n\nID: ' + v + '\nUsername: guest\nRole: user\nBio: Обычный пользователь.\n\n(Попробуйте другой ID)', 'error');
+    showError();
+  }
+}
+
+function runLevel7() {
+  var lv = levels[6];
+  setTerminal(lv.successText, 'success');
+  showSuccess(lv);
+}
+
+function runLevel8() {
+  var lv = levels[7];
+  if (lv.check()) {
+    setTerminal(lv.successText, 'success');
+    showSuccess(lv);
+  } else {
+    setTerminal('[ERROR] Недопустимый тип файла.\nРазрешены только: .jpg, .png, .gif\n\n(Клиентская проверка — единственная защита)', 'error');
+    showError();
+  }
+}
+
+function runLevel9() {
+  var lv = levels[8];
+  if (lv.check()) {
+    setTerminal(lv.successText, 'success');
+    showSuccess(lv);
+  } else {
+    setTerminal('[ERROR] 403 Forbidden\n\nНедостаточные права или невалидная подпись токена.', 'error');
+    showError();
+  }
+}
+
+function runLevel10() {
+  var lv = levels[9];
+  if (lv.check()) {
+    setTerminal(lv.successText, 'success');
+    showSuccess(lv);
+  } else {
+    setTerminal('[ERROR] Request failed: host unreachable or blocked by egress policy.\n\n(Сервер не может достучаться до внешних ресурсов без разрешения)', 'error');
+    showError();
+  }
+}
+
+/* ============================================
+   INIT
+   ============================================ */
+render();
+</script>
 </body>
 </html>
